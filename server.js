@@ -21,14 +21,30 @@ const pool = new Pool({
 async function initDB() {
   const client = await pool.connect();
   try {
+    // Таблиця моделей пристроїв (назва + schema для генерації)
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS models (
+        id           SERIAL PRIMARY KEY,
+        name         VARCHAR(100) UNIQUE NOT NULL,
+        schema       JSONB NOT NULL DEFAULT '{}'::jsonb,
+        created_at   TIMESTAMP DEFAULT NOW()
+      );
+    `);
+
     await client.query(`
       CREATE TABLE IF NOT EXISTS devices (
         id           SERIAL PRIMARY KEY,
         device_id    VARCHAR(50) UNIQUE NOT NULL,
         name         VARCHAR(100),
         hc_node      VARCHAR(50),
+        model_id     INTEGER REFERENCES models(id),
         created_at   TIMESTAMP DEFAULT NOW()
       );
+    `);
+
+    // Міграція: додаємо model_id до існуючої таблиці devices, якщо його ще нема
+    await client.query(`
+      ALTER TABLE devices ADD COLUMN IF NOT EXISTS model_id INTEGER REFERENCES models(id);
     `);
 
     await client.query(`
@@ -45,37 +61,8 @@ async function initDB() {
       );
     `);
 
-    // Підставні пристрої (якщо ще нема)
-    await client.query(`
-      INSERT INTO devices (device_id, name, hc_node) VALUES
-        ('DEV-0001', 'Пристрій №0001', 'HC-Node-A'),
-        ('DEV-0002', 'Пристрій №0002', 'HC-Node-A'),
-        ('DEV-0003', 'Пристрій №0003', 'HC-Node-B')
-      ON CONFLICT (device_id) DO NOTHING;
-    `);
-
-    // Підставні дані для демо (якщо таблиця порожня)
-    const { rows } = await client.query("SELECT COUNT(*) FROM sensor_data");
-    if (parseInt(rows[0].count) === 0) {
-      const devices = ["DEV-0001", "DEV-0002", "DEV-0003"];
-      for (let i = 0; i < 20; i++) {
-        const dev = devices[i % 3];
-        await client.query(`
-          INSERT INTO sensor_data
-            (device_id, temperature, humidity, light, voltage, capacity_ah, charge_pct, received_at)
-          VALUES ($1,$2,$3,$4,$5,$6,$7, NOW() - INTERVAL '${i * 5} minutes')
-        `, [
-          dev,
-          (20 + Math.random() * 15).toFixed(2),
-          (40 + Math.random() * 40).toFixed(2),
-          (100 + Math.random() * 900).toFixed(2),
-          (3.5 + Math.random() * 0.8).toFixed(3),
-          (5 + Math.random() * 5).toFixed(3),
-          (40 + Math.random() * 60).toFixed(2),
-        ]);
-      }
-      console.log("✅ Демо-дані вставлено");
-    }
+    // ⚠️ Жодного автоматичного створення пристроїв чи демо-даних.
+    // Усі моделі, пристрої та серійні номери додаються вручну (адмінпанель / SQL).
 
     console.log("✅ БД ініціалізовано");
   } finally {
@@ -110,12 +97,14 @@ app.post("/api/data", async (req, res) => {
   }
 
   try {
-    // Авто-реєстрація пристрою якщо новий
-    await pool.query(`
-      INSERT INTO devices (device_id, name, hc_node)
-      VALUES ($1, $1, 'Auto')
-      ON CONFLICT (device_id) DO NOTHING
-    `, [device_id]);
+    // Пристрій має існувати в БД — жодного авто-створення.
+    const dev = await pool.query(
+      "SELECT 1 FROM devices WHERE device_id = $1",
+      [device_id]
+    );
+    if (dev.rowCount === 0) {
+      return res.status(404).json({ error: `Пристрій ${device_id} не знайдено в БД` });
+    }
 
     const result = await pool.query(`
       INSERT INTO sensor_data
@@ -167,14 +156,62 @@ app.get("/api/devices/:device_id/history", async (req, res) => {
   }
 });
 
-// ─── API: список пристроїв ───────────────────────────────────
+// ─── API: список пристроїв (з моделлю) ───────────────────────
 app.get("/api/devices", async (req, res) => {
   try {
-    const result = await pool.query("SELECT * FROM devices ORDER BY created_at");
+    const result = await pool.query(`
+      SELECT d.*, m.name AS model_name, m.schema AS model_schema
+      FROM devices d
+      LEFT JOIN models m ON m.id = d.model_id
+      ORDER BY d.created_at
+    `);
     res.json(result.rows);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
+});
+
+// ─── API: список моделей ─────────────────────────────────────
+app.get("/api/models", async (req, res) => {
+  try {
+    const result = await pool.query("SELECT * FROM models ORDER BY name");
+    res.json(result.rows);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ─── API: статус генератора ──────────────────────────────────
+// Генератор (generator.js) надсилає сюди свій стан, дашборд читає його.
+let generatorStatus = {
+  running: false,
+  device_count: 0,
+  packets_sent: 0,
+  interval_ms: null,
+  last_generation: null,
+  last_payload: null,
+  updated_at: null,
+};
+
+app.post("/api/generator/status", (req, res) => {
+  const apiKey = req.headers["x-api-key"];
+  if (apiKey !== process.env.API_KEY) {
+    return res.status(401).json({ error: "Невірний API ключ" });
+  }
+  generatorStatus = {
+    ...generatorStatus,
+    ...req.body,
+    updated_at: new Date().toISOString(),
+  };
+  res.json({ ok: true });
+});
+
+app.get("/api/generator/status", (req, res) => {
+  // Якщо генератор не оновлював статус понад 15с — вважаємо що він зупинений
+  const stale =
+    !generatorStatus.updated_at ||
+    Date.now() - new Date(generatorStatus.updated_at).getTime() > 15000;
+  res.json({ ...generatorStatus, running: generatorStatus.running && !stale });
 });
 
 // ─── Фронтенд (SPA) ──────────────────────────────────────────
