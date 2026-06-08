@@ -286,6 +286,111 @@
     0%{background-position:100% 0}
     100%{background-position:-100% 0}
   }
+
+  /* ── NAV TABS ── */
+  .nav-tabs { display:flex; gap:8px; }
+  .nav-tab {
+    background:transparent; border:1px solid var(--border);
+    color:var(--muted); padding:6px 18px; border-radius:4px;
+    cursor:pointer; font-family:'Rajdhani',sans-serif; font-size:14px;
+    font-weight:600; letter-spacing:.5px; transition:.2s;
+  }
+  .nav-tab:hover { border-color:var(--accent); color:var(--accent); }
+  .nav-tab.active {
+    border-color:var(--accent); color:var(--accent);
+    background:rgba(0,212,255,.08); box-shadow:var(--glow);
+  }
+
+  /* ── GENERATOR ── */
+  .gen-grid {
+    display:grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px,1fr));
+    gap:18px;
+    margin-bottom:32px;
+  }
+  .gen-card {
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:10px;
+    padding:18px 20px;
+  }
+  .gen-label {
+    font-size:10px; letter-spacing:1.5px; text-transform:uppercase;
+    color:var(--muted); margin-bottom:10px;
+  }
+  .gen-value {
+    font-family:'Share Tech Mono',monospace;
+    font-size:26px; color:var(--text); line-height:1.1;
+    word-break:break-word;
+  }
+  .gen-value.accent2 { color:var(--accent2); }
+  .gen-badge {
+    display:inline-block;
+    font-family:'Share Tech Mono',monospace;
+    font-size:14px; padding:4px 12px; border-radius:4px;
+    border:1px solid var(--accent2); color:var(--accent2);
+    box-shadow:var(--glow2);
+  }
+  .gen-badge.offline { border-color:var(--muted); color:var(--muted); box-shadow:none; }
+
+  /* ── GENERATOR CONTROLS ── */
+  .gen-controls {
+    display:flex; align-items:center; gap:14px; flex-wrap:wrap;
+    margin-bottom:24px;
+  }
+  .gen-btn {
+    font-family:'Rajdhani',sans-serif; font-weight:700;
+    font-size:14px; letter-spacing:.8px;
+    padding:10px 22px; border-radius:6px; cursor:pointer;
+    border:1px solid var(--border); background:var(--surface);
+    color:var(--text); transition:.2s;
+  }
+  .gen-btn.start { border-color:var(--accent2); color:var(--accent2); }
+  .gen-btn.start:hover { background:rgba(0,255,135,.1); box-shadow:var(--glow2); }
+  .gen-btn.stop { border-color:#ff6b6b; color:#ff6b6b; }
+  .gen-btn.stop:hover { background:rgba(255,107,107,.1); }
+  .gen-btn:disabled { opacity:.35; cursor:not-allowed; box-shadow:none; background:var(--surface); }
+  .gen-interval-input {
+    display:flex; align-items:center; gap:8px;
+    font-size:12px; color:var(--muted); letter-spacing:.5px;
+  }
+  .gen-interval-input input {
+    width:90px; padding:8px 10px; border-radius:6px;
+    background:var(--bg); border:1px solid var(--border);
+    color:var(--text); font-family:'Share Tech Mono',monospace; font-size:13px;
+  }
+
+  /* ── MANAGE (моделі / пристрої) ── */
+  .gen-manage {
+    display:grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px,1fr));
+    gap:18px;
+    margin-top:32px;
+  }
+  .manage-card {
+    background:var(--surface); border:1px solid var(--border);
+    border-radius:10px; padding:20px;
+    display:flex; flex-direction:column; gap:10px;
+  }
+  .manage-hint { font-size:12px; color:var(--muted); line-height:1.5; margin:0; }
+  .manage-input, .manage-textarea {
+    width:100%; padding:10px 12px; border-radius:6px;
+    background:var(--bg); border:1px solid var(--border);
+    color:var(--text); font-family:'Share Tech Mono',monospace; font-size:13px;
+    box-sizing:border-box;
+  }
+  .manage-textarea { resize:vertical; line-height:1.5; }
+  .manage-input:focus, .manage-textarea:focus { outline:none; border-color:var(--accent); }
+  .manage-btn {
+    margin-top:6px; align-self:flex-start;
+    font-family:'Rajdhani',sans-serif; font-weight:700; font-size:13px;
+    letter-spacing:.6px; padding:9px 18px; border-radius:6px; cursor:pointer;
+    border:1px solid var(--accent); background:rgba(0,212,255,.08); color:var(--accent);
+    transition:.2s;
+  }
+  .manage-btn:hover { background:rgba(0,212,255,.18); box-shadow:var(--glow); }
+  .manage-btn.seed { border-color:var(--accent2); color:var(--accent2); background:rgba(0,255,135,.08); }
+  .manage-btn.seed:hover { background:rgba(0,255,135,.18); box-shadow:var(--glow2); }
 </style>
 </head>
 <body>
@@ -295,6 +400,10 @@
     <div class="logo-icon">⬡</div>
     HG GATEWAY  /  HelioCore AI DASHBOARD
   </div>
+  <nav class="nav-tabs">
+    <button class="nav-tab active" data-view="dashboard" onclick="switchView('dashboard')">Dashboard</button>
+    <button class="nav-tab" data-view="generator" onclick="switchView('generator')">Генератор</button>
+  </nav>
   <div class="header-right">
     <div class="live-dot"></div>
     <span class="live-label">LIVE</span>
@@ -304,6 +413,8 @@
 
 <main>
 
+ <!-- ════════════ DASHBOARD VIEW ════════════ -->
+ <section id="view-dashboard">
   <!-- Architecture diagram -->
   <div class="arch">
     <div class="arch-title">// Архітектура системи</div>
@@ -356,6 +467,85 @@
     <pre id="esp-code"></pre>
     <button class="copy-btn" onclick="copyESP()">📋 Копіювати код</button>
   </div>
+ </section>
+
+ <!-- ════════════ GENERATOR VIEW ════════════ -->
+ <section id="view-generator" style="display:none">
+   <div class="section-title">// Генератор телеметрії — керування</div>
+
+   <div class="gen-controls">
+     <button class="gen-btn start" id="btn-gen-start" onclick="startGenerator()">▶ ЗАПУСТИТИ</button>
+     <button class="gen-btn stop" id="btn-gen-stop" onclick="stopGenerator()">⏹ ЗУПИНИТИ</button>
+     <label class="gen-interval-input">
+       Інтервал (мс):
+       <input type="number" id="gen-interval-input" value="5000" min="500" step="500">
+     </label>
+   </div>
+
+   <div class="gen-grid">
+     <div class="gen-card">
+       <div class="gen-label">Статус генератора</div>
+       <div class="gen-value" id="gen-status">
+         <span class="gen-badge offline" id="gen-badge">ЗУПИНЕНО</span>
+       </div>
+     </div>
+     <div class="gen-card">
+       <div class="gen-label">Знайдено пристроїв</div>
+       <div class="gen-value" id="gen-devices">—</div>
+     </div>
+     <div class="gen-card">
+       <div class="gen-label">Відправлено пакетів</div>
+       <div class="gen-value accent2" id="gen-packets">—</div>
+     </div>
+     <div class="gen-card">
+       <div class="gen-label">Інтервал генерації</div>
+       <div class="gen-value" id="gen-interval">—</div>
+     </div>
+     <div class="gen-card">
+       <div class="gen-label">Остання генерація</div>
+       <div class="gen-value" id="gen-last">—</div>
+     </div>
+   </div>
+
+   <div class="section-title">// Останній згенерований пакет</div>
+   <div class="esp-hint">
+     <pre id="gen-payload">— ще немає даних —</pre>
+   </div>
+
+   <!-- Керування моделями та пристроями -->
+   <div class="gen-manage">
+     <div class="manage-card">
+       <div class="section-title">// Додати модель</div>
+       <p class="manage-hint">Назва моделі + schema (JSON), що описує які поля генерувати.</p>
+       <input class="manage-input" id="model-name" placeholder="Назва моделі (напр. Solar Sensor)">
+       <textarea class="manage-textarea" id="model-schema" rows="8">{
+  "temperature": { "min": 20, "max": 35 },
+  "humidity":    { "min": 40, "max": 80 },
+  "light":       { "min": 100, "max": 1000 },
+  "voltage":     { "min": 3.5, "max": 4.2, "decimals": 3 },
+  "capacity_ah": { "min": 5, "max": 10, "decimals": 3 },
+  "charge_pct":  { "min": 40, "max": 100 }
+}</textarea>
+       <button class="manage-btn" onclick="createModel()">+ Зберегти модель</button>
+     </div>
+
+     <div class="manage-card">
+       <div class="section-title">// Додати пристрій</div>
+       <p class="manage-hint">Серійний номер пристрою та привʼязка до моделі.</p>
+       <input class="manage-input" id="dev-id" placeholder="Серійний номер (напр. DEV-0001)">
+       <input class="manage-input" id="dev-name" placeholder="Назва пристрою">
+       <input class="manage-input" id="dev-node" placeholder="HC Node (напр. HC-Node-A)">
+       <select class="manage-input" id="dev-model"></select>
+       <button class="manage-btn" onclick="createDevice()">+ Зберегти пристрій</button>
+     </div>
+
+     <div class="manage-card">
+       <div class="section-title">// Швидкий старт</div>
+       <p class="manage-hint">Створює демо-модель «Solar Sensor» та 3 пристрої одним кліком — для тесту генератора.</p>
+       <button class="manage-btn seed" onclick="seedDemo()">⚡ Створити демо-набір</button>
+     </div>
+   </div>
+ </section>
 
 </main>
 
@@ -383,15 +573,28 @@ const FIELD_LABELS = {
 // ─────────────────────────────────────────────
 //  LOAD DEVICES
 // ─────────────────────────────────────────────
-async function loadAll() {
+async function loadAll(silent = false) {
   try {
     const res  = await fetch(`${API_BASE}/api/devices/latest`);
     const data = await res.json();
     renderDevices(data);
-    showToast('✓ Дані оновлено');
+
+    // Тихо оновлюємо графік вибраного пристрою, щоб він теж був "живим"
+    if (selectedDevice) refreshHistory(selectedDevice);
+
+    if (!silent) showToast('✓ Дані оновлено');
   } catch(e) {
-    showToast('⚠ Помилка зʼєднання');
+    if (!silent) showToast('⚠ Помилка зʼєднання');
   }
+}
+
+// Тихе оновлення історії/графіку без зміни вибору картки
+async function refreshHistory(id) {
+  try {
+    const res = await fetch(`${API_BASE}/api/devices/${id}/history?limit=50`);
+    historyData = await res.json();
+    drawChart();
+  } catch(e) { /* тихо ігноруємо при авто-оновленні */ }
 }
 
 function renderDevices(devices) {
@@ -450,7 +653,7 @@ function renderDevices(devices) {
   }).join('');
 }
 
-// ─────────────────────────────────────────────
+// ──────────��──────────────────────────────────
 //  SELECT DEVICE → LOAD HISTORY
 // ─────────────────────────────────────────────
 async function selectDevice(id, name) {
@@ -657,10 +860,164 @@ function showToast(msg) {
 }
 
 // ─────────────────────────────────────────────
-//  INIT + AUTO-REFRESH кожні 30 сек
+//  VIEW SWITCHING (Dashboard / Генератор)
 // ─────────────────────────────────────────────
-loadAll();
-setInterval(loadAll, 30000);
+let generatorTimer = null;
+
+function switchView(view) {
+  document.querySelectorAll('.nav-tab').forEach(t =>
+    t.classList.toggle('active', t.dataset.view === view)
+  );
+  document.getElementById('view-dashboard').style.display = view === 'dashboard' ? '' : 'none';
+  document.getElementById('view-generator').style.display = view === 'generator' ? '' : 'none';
+
+  if (view === 'generator') {
+    loadGenerator();
+    loadModelsIntoSelect();
+    if (!generatorTimer) generatorTimer = setInterval(loadGenerator, 3000);
+  } else if (generatorTimer) {
+    clearInterval(generatorTimer);
+    generatorTimer = null;
+  }
+}
+
+async function loadGenerator() {
+  try {
+    const res = await fetch(`${API_BASE}/api/generator/status`);
+    const s = await res.json();
+
+    const badge = document.getElementById('gen-badge');
+    badge.textContent = s.running ? 'ПРАЦЮЄ' : 'ЗУПИНЕНО';
+    badge.classList.toggle('offline', !s.running);
+
+    document.getElementById('btn-gen-start').disabled = s.running;
+    document.getElementById('btn-gen-stop').disabled  = !s.running;
+
+    document.getElementById('gen-devices').textContent =
+      s.device_count != null ? s.device_count : '—';
+    document.getElementById('gen-packets').textContent =
+      s.packets_sent != null ? s.packets_sent : '—';
+    document.getElementById('gen-interval').textContent =
+      s.interval_ms != null ? `${(s.interval_ms / 1000).toFixed(1)} c` : '—';
+    document.getElementById('gen-last').textContent =
+      s.last_generation ? new Date(s.last_generation).toLocaleTimeString('uk-UA') : '—';
+    document.getElementById('gen-payload').textContent =
+      s.last_payload ? JSON.stringify(s.last_payload, null, 2) : '— ще немає даних —';
+  } catch (e) {
+    document.getElementById('gen-badge').textContent = 'НЕДОСТУПНО';
+    document.getElementById('gen-badge').classList.add('offline');
+  }
+}
+
+async function startGenerator() {
+  const ms = parseInt(document.getElementById('gen-interval-input').value, 10) || 5000;
+  try {
+    await fetch(`${API_BASE}/api/generator/start`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ interval_ms: ms }),
+    });
+    showToast('▶ Генератор запущено');
+    loadGenerator();
+  } catch { showToast('Помилка запуску'); }
+}
+
+async function stopGenerator() {
+  try {
+    await fetch(`${API_BASE}/api/generator/stop`, { method: 'POST' });
+    showToast('⏹ Генератор зупинено');
+    loadGenerator();
+  } catch { showToast('Помилка зупинки'); }
+}
+
+// ─── Керування моделями та пристроями ─────────
+async function loadModelsIntoSelect() {
+  try {
+    const res = await fetch(`${API_BASE}/api/models`);
+    const models = await res.json();
+    const sel = document.getElementById('dev-model');
+    sel.innerHTML = '<option value="">— без моделі —</option>' +
+      models.map(m => `<option value="${m.id}">${m.name}</option>`).join('');
+  } catch { /* ignore */ }
+}
+
+async function createModel() {
+  const name = document.getElementById('model-name').value.trim();
+  const raw  = document.getElementById('model-schema').value.trim();
+  if (!name) return showToast('Вкажи назву моделі');
+  let schema;
+  try { schema = JSON.parse(raw); }
+  catch { return showToast('Помилка: schema має бути валідним JSON'); }
+  try {
+    const res = await fetch(`${API_BASE}/api/models`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, schema }),
+    });
+    if (!res.ok) throw new Error();
+    showToast(`Модель "${name}" збережено`);
+    document.getElementById('model-name').value = '';
+    loadModelsIntoSelect();
+  } catch { showToast('Помилка збереження моделі'); }
+}
+
+async function createDevice() {
+  const device_id = document.getElementById('dev-id').value.trim();
+  const name      = document.getElementById('dev-name').value.trim();
+  const hc_node   = document.getElementById('dev-node').value.trim();
+  const model_id  = document.getElementById('dev-model').value || null;
+  if (!device_id) return showToast('Вкажи серійний номер');
+  try {
+    const res = await fetch(`${API_BASE}/api/devices`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ device_id, name, hc_node, model_id }),
+    });
+    if (!res.ok) throw new Error();
+    showToast(`Пристрій "${device_id}" збережено`);
+    document.getElementById('dev-id').value = '';
+    document.getElementById('dev-name').value = '';
+    document.getElementById('dev-node').value = '';
+    loadAll();
+  } catch { showToast('Помилка збереження пристрою'); }
+}
+
+async function seedDemo() {
+  try {
+    const res = await fetch(`${API_BASE}/api/seed`, { method: 'POST' });
+    if (!res.ok) throw new Error();
+    showToast('Демо-набір створено (1 модель + 3 пристрої)');
+    loadModelsIntoSelect();
+    loadAll();
+  } catch { showToast('Помилка створення демо-набору'); }
+}
+
+// ─────────────────────────────────────────────
+//  INIT + ТИХЕ AUTO-REFRESH (AJAX, без перезавантаження)
+// ─────────────────────────────────────────────
+const REFRESH_MS = 3000; // частота фонового оновлення
+let refreshTimer = null;
+
+function startAutoRefresh() {
+  if (refreshTimer) return;
+  refreshTimer = setInterval(() => loadAll(true), REFRESH_MS); // silent = true
+}
+function stopAutoRefresh() {
+  if (refreshTimer) { clearInterval(refreshTimer); refreshTimer = null; }
+}
+
+// Не оновлюємо у фоні, коли вкладка прихована — економимо ресурси
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) {
+    stopAutoRefresh();
+  } else {
+    loadAll(true);      // одразу підтягнути свіже при поверненні
+    startAutoRefresh();
+  }
+});
+
+loadAll();              // перше завантаження — з тостом
+startAutoRefresh();     // далі тихо кожні 3 сек
 </script>
 </body>
 </html>
