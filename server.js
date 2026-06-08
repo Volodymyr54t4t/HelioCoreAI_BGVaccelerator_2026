@@ -261,7 +261,7 @@ app.post("/api/seed", async (req, res) => {
 const generator = {
   running: false,
   timer: null,
-  intervalMs: parseInt(process.env.GENERATOR_INTERVAL_MS || "5000", 10),
+  intervalMs: parseInt(process.env.GENERATOR_INTERVAL_MS || "60000", 10),
   packetsSent: 0,
   deviceCount: 0,
   lastGeneration: null,

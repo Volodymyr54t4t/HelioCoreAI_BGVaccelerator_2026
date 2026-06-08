@@ -1,524 +1,887 @@
 <!DOCTYPE html>
 <html lang="uk">
+
 <head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>HelioCore AI</title>
-<link rel="preconnect" href="https://fonts.googleapis.com"/>
-<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;600;700&display=swap" rel="stylesheet"/>
-<style>
-  :root {
-    --bg:        #080c10;
-    --surface:   #0d1520;
-    --border:    #1a2d42;
-    --accent:    #00d4ff;
-    --accent2:   #00ff9d;
-    --warn:      #ff9500;
-    --danger:    #ff3b5c;
-    --text:      #c8dce8;
-    --muted:     #4a6278;
-    --glow:      0 0 18px rgba(0,212,255,.35);
-    --glow2:     0 0 18px rgba(0,255,157,.35);
-  }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>HelioCore AI</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;600;700&display=swap"
+    rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #080c10;
+      --surface: #0d1520;
+      --border: #1a2d42;
+      --accent: #00d4ff;
+      --accent2: #00ff9d;
+      --warn: #ff9500;
+      --danger: #ff3b5c;
+      --text: #c8dce8;
+      --muted: #4a6278;
+      --glow: 0 0 18px rgba(0, 212, 255, .35);
+      --glow2: 0 0 18px rgba(0, 255, 157, .35);
+    }
 
-  * { box-sizing: border-box; margin: 0; padding: 0; }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
 
-  body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: 'Rajdhani', sans-serif;
-    font-size: 15px;
-    min-height: 100vh;
-    overflow-x: hidden;
-  }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 15px;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
 
-  /* scanline overlay */
-  body::before {
-    content:'';
-    position:fixed; inset:0; pointer-events:none; z-index:999;
-    background: repeating-linear-gradient(0deg,
-      transparent, transparent 2px,
-      rgba(0,0,0,.08) 2px, rgba(0,0,0,.08) 4px);
-  }
+    /* scanline overlay */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 999;
+      background: repeating-linear-gradient(0deg,
+          transparent, transparent 2px,
+          rgba(0, 0, 0, .08) 2px, rgba(0, 0, 0, .08) 4px);
+    }
 
-  /* ── HEADER ── */
-  header {
-    display: flex; align-items: center; justify-content: space-between;
-    padding: 14px 28px;
-    background: var(--surface);
-    border-bottom: 1px solid var(--border);
-    position: sticky; top:0; z-index:100;
-  }
-  .logo {
-    display:flex; align-items:center; gap:12px;
-    font-family: 'Share Tech Mono', monospace;
-    font-size: 18px; color: var(--accent);
-    text-shadow: var(--glow);
-  }
-  .logo-icon {
-    width:32px; height:32px;
-    border:2px solid var(--accent);
-    border-radius:6px;
-    display:flex; align-items:center; justify-content:center;
-    font-size:14px;
-    box-shadow: var(--glow);
-  }
-  .header-right { display:flex; align-items:center; gap:18px; }
-  .live-dot {
-    width:8px; height:8px; border-radius:50%;
-    background: var(--accent2);
-    box-shadow: var(--glow2);
-    animation: pulse 1.8s ease-in-out infinite;
-  }
-  @keyframes pulse {
-    0%,100%{ opacity:1; transform:scale(1); }
-    50%{ opacity:.4; transform:scale(.7); }
-  }
-  .live-label { font-size:13px; color:var(--accent2); font-family:'Share Tech Mono',monospace; }
-  .refresh-btn {
-    background:transparent; border:1px solid var(--accent);
-    color:var(--accent); padding:6px 14px; border-radius:4px;
-    cursor:pointer; font-family:'Rajdhani',sans-serif; font-size:14px;
-    font-weight:600; transition:.2s;
-  }
-  .refresh-btn:hover { background:var(--accent); color:var(--bg); box-shadow:var(--glow); }
+    /* ── HEADER ── */
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 28px;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
 
-  /* ── LAYOUT ── */
-  main { padding:24px 28px; max-width:1400px; margin:0 auto; }
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 18px;
+      color: var(--accent);
+      text-shadow: var(--glow);
+    }
 
-  /* ── ARCH DIAGRAM ── */
-  .arch {
-    background: var(--surface);
-    border:1px solid var(--border);
-    border-radius:10px;
-    padding:18px 24px;
-    margin-bottom:28px;
-    font-family:'Share Tech Mono', monospace;
-    font-size:12px;
-    color: var(--muted);
-    overflow-x:auto;
-    white-space:nowrap;
-  }
-  .arch-title { font-size:11px; color:var(--muted); margin-bottom:10px; letter-spacing:2px; text-transform:uppercase; }
-  .arch-flow { display:flex; align-items:center; gap:6px; flex-wrap:wrap; }
-  .arch-box {
-    border:1px solid var(--border); padding:5px 10px; border-radius:4px;
-    color: var(--text); white-space:nowrap;
-  }
-  .arch-box.active { border-color:var(--accent); color:var(--accent); box-shadow:var(--glow); }
-  .arch-box.green { border-color:var(--accent2); color:var(--accent2); box-shadow:var(--glow2); }
-  .arch-arrow { color:var(--accent); font-size:16px; }
+    .logo-icon {
+      width: 32px;
+      height: 32px;
+      border: 2px solid var(--accent);
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      box-shadow: var(--glow);
+    }
 
-  /* ── SECTION TITLE ── */
-  .section-title {
-    font-size:11px; letter-spacing:3px; text-transform:uppercase;
-    color:var(--muted); margin-bottom:14px;
-    display:flex; align-items:center; gap:10px;
-  }
-  .section-title::after {
-    content:''; flex:1; height:1px; background:var(--border);
-  }
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 18px;
+    }
 
-  /* ── DEVICE GRID ── */
-  #devices-grid {
-    display:grid;
-    grid-template-columns: repeat(auto-fill, minmax(320px,1fr));
-    gap:18px;
-    margin-bottom:32px;
-  }
+    .live-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--accent2);
+      box-shadow: var(--glow2);
+      animation: pulse 1.8s ease-in-out infinite;
+    }
 
-  .device-card {
-    background:var(--surface);
-    border:1px solid var(--border);
-    border-radius:10px;
-    overflow:hidden;
-    transition:.25s;
-    cursor:pointer;
-  }
-  .device-card:hover { border-color:var(--accent); box-shadow:var(--glow); transform:translateY(-2px); }
-  .device-card.selected { border-color:var(--accent2); box-shadow:var(--glow2); }
+    @keyframes pulse {
 
-  .card-header {
-    display:flex; align-items:center; justify-content:space-between;
-    padding:12px 16px;
-    border-bottom:1px solid var(--border);
-    background: rgba(0,212,255,.04);
-  }
-  .card-id {
-    font-family:'Share Tech Mono',monospace;
-    color:var(--accent); font-size:13px;
-  }
-  .card-node {
-    font-size:11px; color:var(--muted);
-    background:rgba(255,255,255,.04);
-    padding:3px 8px; border-radius:3px;
-  }
-  .card-status {
-    width:8px; height:8px; border-radius:50%;
-    background: var(--accent2);
-    box-shadow: var(--glow2);
-    animation: pulse 2s ease-in-out infinite;
-  }
-  .card-status.offline { background:var(--muted); box-shadow:none; animation:none; }
+      0%,
+      100% {
+        opacity: 1;
+        transform: scale(1);
+      }
 
-  .card-body { padding:14px 16px; display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+      50% {
+        opacity: .4;
+        transform: scale(.7);
+      }
+    }
 
-  .metric {
-    background:rgba(255,255,255,.03);
-    border:1px solid var(--border);
-    border-radius:6px;
-    padding:10px 12px;
-  }
-  .metric-label {
-    font-size:10px; letter-spacing:1.5px; text-transform:uppercase;
-    color:var(--muted); margin-bottom:4px;
-  }
-  .metric-value {
-    font-family:'Share Tech Mono',monospace;
-    font-size:20px; color:var(--text); line-height:1;
-  }
-  .metric-value .unit { font-size:11px; color:var(--muted); margin-left:2px; }
+    .live-label {
+      font-size: 13px;
+      color: var(--accent2);
+      font-family: 'Share Tech Mono', monospace;
+    }
 
-  .metric.temp .metric-value { color:#ff6b6b; }
-  .metric.hum  .metric-value { color:#4ecdc4; }
-  .metric.light .metric-value { color:#ffe66d; }
-  .metric.volt  .metric-value { color:var(--accent); }
-  .metric.cap   .metric-value { color:var(--accent2); }
-  .metric.charge .metric-value { color:var(--warn); }
+    .refresh-btn {
+      background: transparent;
+      border: 1px solid var(--accent);
+      color: var(--accent);
+      padding: 6px 14px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      transition: .2s;
+    }
 
-  .charge-bar {
-    height:4px; background:rgba(255,255,255,.08);
-    border-radius:2px; margin-top:6px; overflow:hidden;
-  }
-  .charge-fill {
-    height:100%; border-radius:2px;
-    background: linear-gradient(90deg, var(--warn), var(--accent2));
-    transition: width .6s ease;
-  }
+    .refresh-btn:hover {
+      background: var(--accent);
+      color: var(--bg);
+      box-shadow: var(--glow);
+    }
 
-  .card-footer {
-    padding:8px 16px;
-    border-top:1px solid var(--border);
-    font-size:11px; color:var(--muted);
-    font-family:'Share Tech Mono',monospace;
-  }
+    /* ── LAYOUT ── */
+    main {
+      padding: 24px 28px;
+      max-width: 1400px;
+      margin: 0 auto;
+    }
 
-  /* ── HISTORY CHART ── */
-  .chart-section {
-    background:var(--surface);
-    border:1px solid var(--border);
-    border-radius:10px;
-    padding:20px 24px;
-    margin-bottom:28px;
-  }
-  .chart-header {
-    display:flex; align-items:center; justify-content:space-between;
-    margin-bottom:18px;
-  }
-  .chart-title { font-size:16px; font-weight:700; color:var(--text); }
-  .chart-device {
-    font-family:'Share Tech Mono',monospace;
-    font-size:12px; color:var(--accent);
-  }
-  .tab-row { display:flex; gap:8px; margin-bottom:16px; flex-wrap:wrap; }
-  .tab {
-    background:transparent; border:1px solid var(--border);
-    color:var(--muted); padding:5px 14px; border-radius:4px;
-    cursor:pointer; font-family:'Rajdhani',sans-serif; font-size:13px;
-    font-weight:600; transition:.2s;
-  }
-  .tab.active,
-  .tab:hover { border-color:var(--accent); color:var(--accent); background:rgba(0,212,255,.08); }
+    /* ── ARCH DIAGRAM ── */
+    .arch {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 18px 24px;
+      margin-bottom: 28px;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 12px;
+      color: var(--muted);
+      overflow-x: auto;
+      white-space: nowrap;
+    }
 
-  canvas { width:100% !important; }
+    .arch-title {
+      font-size: 11px;
+      color: var(--muted);
+      margin-bottom: 10px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+    }
 
-  /* ── ESP CODE HINT ── */
-  .esp-hint {
-    background:var(--surface);
-    border:1px solid var(--border);
-    border-radius:10px;
-    padding:20px 24px;
-    margin-bottom:28px;
-  }
-  .esp-hint pre {
-    font-family:'Share Tech Mono',monospace;
-    font-size:12px; color:#a8c7d8;
-    background:rgba(0,0,0,.4);
-    border:1px solid var(--border);
-    border-radius:6px;
-    padding:16px;
-    overflow-x:auto;
-    line-height:1.7;
-  }
-  .esp-hint pre .kw { color:var(--accent); }
-  .esp-hint pre .str { color:var(--accent2); }
-  .esp-hint pre .cmt { color:var(--muted); }
-  .copy-btn {
-    background:transparent; border:1px solid var(--border);
-    color:var(--muted); padding:5px 12px; border-radius:4px;
-    cursor:pointer; font-size:12px; margin-top:10px; transition:.2s;
-  }
-  .copy-btn:hover { border-color:var(--accent2); color:var(--accent2); }
+    .arch-flow {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
 
-  /* ── TOAST ── */
-  #toast {
-    position:fixed; bottom:24px; right:24px;
-    background:var(--surface); border:1px solid var(--accent2);
-    color:var(--accent2); padding:10px 18px;
-    border-radius:6px; font-size:13px;
-    box-shadow:var(--glow2);
-    transform:translateY(80px); opacity:0;
-    transition:.3s; z-index:9999;
-    font-family:'Share Tech Mono',monospace;
-  }
-  #toast.show { transform:translateY(0); opacity:1; }
+    .arch-box {
+      border: 1px solid var(--border);
+      padding: 5px 10px;
+      border-radius: 4px;
+      color: var(--text);
+      white-space: nowrap;
+    }
 
-  /* ── LOADING ── */
-  .skeleton {
-    background: linear-gradient(90deg,
-      var(--surface) 25%, rgba(0,212,255,.05) 50%, var(--surface) 75%);
-    background-size:400% 100%;
-    animation: shimmer 1.4s infinite;
-    border-radius:6px;
-    height:90px;
-  }
-  @keyframes shimmer {
-    0%{background-position:100% 0}
-    100%{background-position:-100% 0}
-  }
+    .arch-box.active {
+      border-color: var(--accent);
+      color: var(--accent);
+      box-shadow: var(--glow);
+    }
 
-  /* ── NAV TABS ── */
-  .nav-tabs { display:flex; gap:8px; }
-  .nav-tab {
-    background:transparent; border:1px solid var(--border);
-    color:var(--muted); padding:6px 18px; border-radius:4px;
-    cursor:pointer; font-family:'Rajdhani',sans-serif; font-size:14px;
-    font-weight:600; letter-spacing:.5px; transition:.2s;
-  }
-  .nav-tab:hover { border-color:var(--accent); color:var(--accent); }
-  .nav-tab.active {
-    border-color:var(--accent); color:var(--accent);
-    background:rgba(0,212,255,.08); box-shadow:var(--glow);
-  }
+    .arch-box.green {
+      border-color: var(--accent2);
+      color: var(--accent2);
+      box-shadow: var(--glow2);
+    }
 
-  /* ── GENERATOR ── */
-  .gen-grid {
-    display:grid;
-    grid-template-columns: repeat(auto-fill, minmax(220px,1fr));
-    gap:18px;
-    margin-bottom:32px;
-  }
-  .gen-card {
-    background:var(--surface);
-    border:1px solid var(--border);
-    border-radius:10px;
-    padding:18px 20px;
-  }
-  .gen-label {
-    font-size:10px; letter-spacing:1.5px; text-transform:uppercase;
-    color:var(--muted); margin-bottom:10px;
-  }
-  .gen-value {
-    font-family:'Share Tech Mono',monospace;
-    font-size:26px; color:var(--text); line-height:1.1;
-    word-break:break-word;
-  }
-  .gen-value.accent2 { color:var(--accent2); }
-  .gen-badge {
-    display:inline-block;
-    font-family:'Share Tech Mono',monospace;
-    font-size:14px; padding:4px 12px; border-radius:4px;
-    border:1px solid var(--accent2); color:var(--accent2);
-    box-shadow:var(--glow2);
-  }
-  .gen-badge.offline { border-color:var(--muted); color:var(--muted); box-shadow:none; }
+    .arch-arrow {
+      color: var(--accent);
+      font-size: 16px;
+    }
 
-  /* ── GENERATOR CONTROLS ── */
-  .gen-controls {
-    display:flex; align-items:center; gap:14px; flex-wrap:wrap;
-    margin-bottom:24px;
-  }
-  .gen-btn {
-    font-family:'Rajdhani',sans-serif; font-weight:700;
-    font-size:14px; letter-spacing:.8px;
-    padding:10px 22px; border-radius:6px; cursor:pointer;
-    border:1px solid var(--border); background:var(--surface);
-    color:var(--text); transition:.2s;
-  }
-  .gen-btn.start { border-color:var(--accent2); color:var(--accent2); }
-  .gen-btn.start:hover { background:rgba(0,255,135,.1); box-shadow:var(--glow2); }
-  .gen-btn.stop { border-color:#ff6b6b; color:#ff6b6b; }
-  .gen-btn.stop:hover { background:rgba(255,107,107,.1); }
-  .gen-btn:disabled { opacity:.35; cursor:not-allowed; box-shadow:none; background:var(--surface); }
-  .gen-interval-input {
-    display:flex; align-items:center; gap:8px;
-    font-size:12px; color:var(--muted); letter-spacing:.5px;
-  }
-  .gen-interval-input input {
-    width:90px; padding:8px 10px; border-radius:6px;
-    background:var(--bg); border:1px solid var(--border);
-    color:var(--text); font-family:'Share Tech Mono',monospace; font-size:13px;
-  }
+    /* ── SECTION TITLE ── */
+    .section-title {
+      font-size: 11px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
 
-  /* ── MANAGE (моделі / пристрої) ── */
-  .gen-manage {
-    display:grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px,1fr));
-    gap:18px;
-    margin-top:32px;
-  }
-  .manage-card {
-    background:var(--surface); border:1px solid var(--border);
-    border-radius:10px; padding:20px;
-    display:flex; flex-direction:column; gap:10px;
-  }
-  .manage-hint { font-size:12px; color:var(--muted); line-height:1.5; margin:0; }
-  .manage-input, .manage-textarea {
-    width:100%; padding:10px 12px; border-radius:6px;
-    background:var(--bg); border:1px solid var(--border);
-    color:var(--text); font-family:'Share Tech Mono',monospace; font-size:13px;
-    box-sizing:border-box;
-  }
-  .manage-textarea { resize:vertical; line-height:1.5; }
-  .manage-input:focus, .manage-textarea:focus { outline:none; border-color:var(--accent); }
-  .manage-btn {
-    margin-top:6px; align-self:flex-start;
-    font-family:'Rajdhani',sans-serif; font-weight:700; font-size:13px;
-    letter-spacing:.6px; padding:9px 18px; border-radius:6px; cursor:pointer;
-    border:1px solid var(--accent); background:rgba(0,212,255,.08); color:var(--accent);
-    transition:.2s;
-  }
-  .manage-btn:hover { background:rgba(0,212,255,.18); box-shadow:var(--glow); }
-  .manage-btn.seed { border-color:var(--accent2); color:var(--accent2); background:rgba(0,255,135,.08); }
-  .manage-btn.seed:hover { background:rgba(0,255,135,.18); box-shadow:var(--glow2); }
-</style>
+    .section-title::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    /* ── DEVICE GRID ── */
+    #devices-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 18px;
+      margin-bottom: 32px;
+    }
+
+    .device-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+      transition: .25s;
+      cursor: pointer;
+    }
+
+    .device-card:hover {
+      border-color: var(--accent);
+      box-shadow: var(--glow);
+      transform: translateY(-2px);
+    }
+
+    .device-card.selected {
+      border-color: var(--accent2);
+      box-shadow: var(--glow2);
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border);
+      background: rgba(0, 212, 255, .04);
+    }
+
+    .card-id {
+      font-family: 'Share Tech Mono', monospace;
+      color: var(--accent);
+      font-size: 13px;
+    }
+
+    .card-node {
+      font-size: 11px;
+      color: var(--muted);
+      background: rgba(255, 255, 255, .04);
+      padding: 3px 8px;
+      border-radius: 3px;
+    }
+
+    .card-status {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--accent2);
+      box-shadow: var(--glow2);
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    .card-status.offline {
+      background: var(--muted);
+      box-shadow: none;
+      animation: none;
+    }
+
+    .card-body {
+      padding: 14px 16px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .metric {
+      background: rgba(255, 255, 255, .03);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 10px 12px;
+    }
+
+    .metric-label {
+      font-size: 10px;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 4px;
+    }
+
+    .metric-value {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 20px;
+      color: var(--text);
+      line-height: 1;
+    }
+
+    .metric-value .unit {
+      font-size: 11px;
+      color: var(--muted);
+      margin-left: 2px;
+    }
+
+    .metric.temp .metric-value {
+      color: #ff6b6b;
+    }
+
+    .metric.hum .metric-value {
+      color: #4ecdc4;
+    }
+
+    .metric.light .metric-value {
+      color: #ffe66d;
+    }
+
+    .metric.volt .metric-value {
+      color: var(--accent);
+    }
+
+    .metric.cap .metric-value {
+      color: var(--accent2);
+    }
+
+    .metric.charge .metric-value {
+      color: var(--warn);
+    }
+
+    .charge-bar {
+      height: 4px;
+      background: rgba(255, 255, 255, .08);
+      border-radius: 2px;
+      margin-top: 6px;
+      overflow: hidden;
+    }
+
+    .charge-fill {
+      height: 100%;
+      border-radius: 2px;
+      background: linear-gradient(90deg, var(--warn), var(--accent2));
+      transition: width .6s ease;
+    }
+
+    .card-footer {
+      padding: 8px 16px;
+      border-top: 1px solid var(--border);
+      font-size: 11px;
+      color: var(--muted);
+      font-family: 'Share Tech Mono', monospace;
+    }
+
+    /* ── HISTORY CHART ── */
+    .chart-section {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 20px 24px;
+      margin-bottom: 28px;
+    }
+
+    .chart-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 18px;
+    }
+
+    .chart-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .chart-device {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 12px;
+      color: var(--accent);
+    }
+
+    .tab-row {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+
+    .tab {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      padding: 5px 14px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 13px;
+      font-weight: 600;
+      transition: .2s;
+    }
+
+    .tab.active,
+    .tab:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+      background: rgba(0, 212, 255, .08);
+    }
+
+    canvas {
+      width: 100% !important;
+    }
+
+    /* ── ESP CODE HINT ── */
+    .esp-hint {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 20px 24px;
+      margin-bottom: 28px;
+    }
+
+    .esp-hint pre {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 12px;
+      color: #a8c7d8;
+      background: rgba(0, 0, 0, .4);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 16px;
+      overflow-x: auto;
+      line-height: 1.7;
+    }
+
+    .esp-hint pre .kw {
+      color: var(--accent);
+    }
+
+    .esp-hint pre .str {
+      color: var(--accent2);
+    }
+
+    .esp-hint pre .cmt {
+      color: var(--muted);
+    }
+
+    .copy-btn {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      padding: 5px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 12px;
+      margin-top: 10px;
+      transition: .2s;
+    }
+
+    .copy-btn:hover {
+      border-color: var(--accent2);
+      color: var(--accent2);
+    }
+
+    /* ── TOAST ── */
+    #toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: var(--surface);
+      border: 1px solid var(--accent2);
+      color: var(--accent2);
+      padding: 10px 18px;
+      border-radius: 6px;
+      font-size: 13px;
+      box-shadow: var(--glow2);
+      transform: translateY(80px);
+      opacity: 0;
+      transition: .3s;
+      z-index: 9999;
+      font-family: 'Share Tech Mono', monospace;
+    }
+
+    #toast.show {
+      transform: translateY(0);
+      opacity: 1;
+    }
+
+    /* ── LOADING ── */
+    .skeleton {
+      background: linear-gradient(90deg,
+          var(--surface) 25%, rgba(0, 212, 255, .05) 50%, var(--surface) 75%);
+      background-size: 400% 100%;
+      animation: shimmer 1.4s infinite;
+      border-radius: 6px;
+      height: 90px;
+    }
+
+    @keyframes shimmer {
+      0% {
+        background-position: 100% 0
+      }
+
+      100% {
+        background-position: -100% 0
+      }
+    }
+
+    /* ── NAV TABS ── */
+    .nav-tabs {
+      display: flex;
+      gap: 8px;
+    }
+
+    .nav-tab {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      padding: 6px 18px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      letter-spacing: .5px;
+      transition: .2s;
+    }
+
+    .nav-tab:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .nav-tab.active {
+      border-color: var(--accent);
+      color: var(--accent);
+      background: rgba(0, 212, 255, .08);
+      box-shadow: var(--glow);
+    }
+
+    /* ── GENERATOR ── */
+    .gen-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 18px;
+      margin-bottom: 32px;
+    }
+
+    .gen-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 18px 20px;
+    }
+
+    .gen-label {
+      font-size: 10px;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 10px;
+    }
+
+    .gen-value {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 26px;
+      color: var(--text);
+      line-height: 1.1;
+      word-break: break-word;
+    }
+
+    .gen-value.accent2 {
+      color: var(--accent2);
+    }
+
+    .gen-badge {
+      display: inline-block;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 14px;
+      padding: 4px 12px;
+      border-radius: 4px;
+      border: 1px solid var(--accent2);
+      color: var(--accent2);
+      box-shadow: var(--glow2);
+    }
+
+    .gen-badge.offline {
+      border-color: var(--muted);
+      color: var(--muted);
+      box-shadow: none;
+    }
+
+    /* ── GENERATOR CONTROLS ── */
+    .gen-controls {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      flex-wrap: wrap;
+      margin-bottom: 24px;
+    }
+
+    .gen-btn {
+      font-family: 'Rajdhani', sans-serif;
+      font-weight: 700;
+      font-size: 14px;
+      letter-spacing: .8px;
+      padding: 10px 22px;
+      border-radius: 6px;
+      cursor: pointer;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text);
+      transition: .2s;
+    }
+
+    .gen-btn.start {
+      border-color: var(--accent2);
+      color: var(--accent2);
+    }
+
+    .gen-btn.start:hover {
+      background: rgba(0, 255, 135, .1);
+      box-shadow: var(--glow2);
+    }
+
+    .gen-btn.stop {
+      border-color: #ff6b6b;
+      color: #ff6b6b;
+    }
+
+    .gen-btn.stop:hover {
+      background: rgba(255, 107, 107, .1);
+    }
+
+    .gen-btn:disabled {
+      opacity: .35;
+      cursor: not-allowed;
+      box-shadow: none;
+      background: var(--surface);
+    }
+
+    .gen-interval-input {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      color: var(--muted);
+      letter-spacing: .5px;
+    }
+
+    .gen-interval-input input {
+      width: 90px;
+      padding: 8px 10px;
+      border-radius: 6px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      color: var(--text);
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 13px;
+    }
+
+    /* ── MANAGE (моделі / пристрої) ── */
+    .gen-manage {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 18px;
+      margin-top: 32px;
+    }
+
+    .manage-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .manage-hint {
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.5;
+      margin: 0;
+    }
+
+    .manage-input,
+    .manage-textarea {
+      width: 100%;
+      padding: 10px 12px;
+      border-radius: 6px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      color: var(--text);
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 13px;
+      box-sizing: border-box;
+    }
+
+    .manage-textarea {
+      resize: vertical;
+      line-height: 1.5;
+    }
+
+    .manage-input:focus,
+    .manage-textarea:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+
+    .manage-btn {
+      margin-top: 6px;
+      align-self: flex-start;
+      font-family: 'Rajdhani', sans-serif;
+      font-weight: 700;
+      font-size: 13px;
+      letter-spacing: .6px;
+      padding: 9px 18px;
+      border-radius: 6px;
+      cursor: pointer;
+      border: 1px solid var(--accent);
+      background: rgba(0, 212, 255, .08);
+      color: var(--accent);
+      transition: .2s;
+    }
+
+    .manage-btn:hover {
+      background: rgba(0, 212, 255, .18);
+      box-shadow: var(--glow);
+    }
+
+    .manage-btn.seed {
+      border-color: var(--accent2);
+      color: var(--accent2);
+      background: rgba(0, 255, 135, .08);
+    }
+
+    .manage-btn.seed:hover {
+      background: rgba(0, 255, 135, .18);
+      box-shadow: var(--glow2);
+    }
+  </style>
 </head>
+
 <body>
 
-<header>
-  <div class="logo">
-    <div class="logo-icon">⬡</div>
-    HG GATEWAY  /  HelioCore AI DASHBOARD
-  </div>
-  <nav class="nav-tabs">
-    <button class="nav-tab active" data-view="dashboard" onclick="switchView('dashboard')">Dashboard</button>
-    <button class="nav-tab" data-view="generator" onclick="switchView('generator')">Генератор</button>
-  </nav>
-  <div class="header-right">
-    <div class="live-dot"></div>
-    <span class="live-label">LIVE</span>
-    <button class="refresh-btn" onclick="loadAll()">↺ ОНОВИТИ</button>
-  </div>
-</header>
-
-<main>
-
- <!-- ════════════ DASHBOARD VIEW ════════════ -->
- <section id="view-dashboard">
-  <!-- Architecture diagram -->
-  <div class="arch">
-    <div class="arch-title">// Архітектура системи</div>
-    <div class="arch-flow">
-      <div class="arch-box">[HC Пристрої]</div>
-      <div class="arch-arrow">→</div>
-      <div class="arch-box active">[HG Шлюз/Хаб]</div>
-      <div class="arch-arrow">→</div>
-      <div class="arch-box active">[ESP-модуль]</div>
-      <div class="arch-arrow">→ Wi-Fi/GPRS →</div>
-      <div class="arch-box green">[API /api/data]</div>
-      <div class="arch-arrow">→</div>
-      <div class="arch-box green">[Server.js]</div>
-      <div class="arch-arrow">↔</div>
-      <div class="arch-box green">[PostgreSQL]</div>
-      <div class="arch-arrow">→</div>
-      <div class="arch-box active">[Site]</div>
+  <header>
+    <div class="logo">
+      <div class="logo-icon">⬡</div>
+      HG GATEWAY / HelioCore AI DASHBOARD
     </div>
-  </div>
+    <nav class="nav-tabs">
+      <button class="nav-tab active" data-view="dashboard" onclick="switchView('dashboard')">Dashboard</button>
+      <button class="nav-tab" data-view="generator" onclick="switchView('generator')">Генератор</button>
+    </nav>
+    <div class="header-right">
+      <div class="live-dot"></div>
+      <span class="live-label">LIVE</span>
+      <button class="refresh-btn" onclick="loadAll()">↺ ОНОВИТИ</button>
+    </div>
+  </header>
 
-  <!-- Devices -->
-  <div class="section-title">// Пристрої — остання передача</div>
-  <div id="devices-grid">
-    <div class="skeleton"></div>
-    <div class="skeleton"></div>
-    <div class="skeleton"></div>
-  </div>
+  <main>
 
-  <!-- History chart -->
-  <div class="chart-section" id="chart-section">
-    <div class="chart-header">
-      <div>
-        <div class="chart-title">Графік даних</div>
-        <div class="chart-device" id="chart-device-label">Оберіть пристрій вище ↑</div>
+    <!-- ════════════ DASHBOARD VIEW ════════════ -->
+    <section id="view-dashboard">
+      <!-- Architecture diagram -->
+      <div class="arch">
+        <div class="arch-title">// Архітектура системи</div>
+        <div class="arch-flow">
+          <div class="arch-box">[HC Пристрої]</div>
+          <div class="arch-arrow">→</div>
+          <div class="arch-box active">[HG Шлюз/Хаб]</div>
+          <div class="arch-arrow">→</div>
+          <div class="arch-box active">[ESP-модуль]</div>
+          <div class="arch-arrow">→ Wi-Fi/GPRS →</div>
+          <div class="arch-box green">[API /api/data]</div>
+          <div class="arch-arrow">→</div>
+          <div class="arch-box green">[Server.js]</div>
+          <div class="arch-arrow">↔</div>
+          <div class="arch-box green">[PostgreSQL]</div>
+          <div class="arch-arrow">→</div>
+          <div class="arch-box active">[Site]</div>
+        </div>
       </div>
-    </div>
-    <div class="tab-row" id="tabs">
-      <button class="tab active" data-field="temperature">🌡 Температура</button>
-      <button class="tab" data-field="humidity">💧 Вологість</button>
-      <button class="tab" data-field="light">☀ Освітленість</button>
-      <button class="tab" data-field="voltage">⚡ Напруга</button>
-      <button class="tab" data-field="charge_pct">🔋 Заряд %</button>
-    </div>
-    <canvas id="chart" height="260"></canvas>
-  </div>
 
-  <!-- ESP code hint -->
-  <div class="esp-hint">
-    <div class="section-title">// Код для ESP (Arduino) — POST даних на сервер</div>
-    <pre id="esp-code"></pre>
-    <button class="copy-btn" onclick="copyESP()">📋 Копіювати код</button>
-  </div>
- </section>
+      <!-- Devices -->
+      <div class="section-title">// Пристрої — остання передача</div>
+      <div id="devices-grid">
+        <div class="skeleton"></div>
+        <div class="skeleton"></div>
+        <div class="skeleton"></div>
+      </div>
 
- <!-- ════════════ GENERATOR VIEW ════════════ -->
- <section id="view-generator" style="display:none">
-   <div class="section-title">// Генератор телеметрії — керування</div>
+      <!-- History chart -->
+      <div class="chart-section" id="chart-section">
+        <div class="chart-header">
+          <div>
+            <div class="chart-title">Графік даних</div>
+            <div class="chart-device" id="chart-device-label">Оберіть пристрій вище ↑</div>
+          </div>
+        </div>
+        <div class="tab-row" id="tabs">
+          <button class="tab active" data-field="temperature">🌡 Температура</button>
+          <button class="tab" data-field="humidity">💧 Вологість</button>
+          <button class="tab" data-field="light">☀ Освітленість</button>
+          <button class="tab" data-field="voltage">⚡ Напруга</button>
+          <button class="tab" data-field="charge_pct">🔋 Заряд %</button>
+        </div>
+        <canvas id="chart" height="260"></canvas>
+      </div>
 
-   <div class="gen-controls">
-     <button class="gen-btn start" id="btn-gen-start" onclick="startGenerator()">▶ ЗАПУСТИТИ</button>
-     <button class="gen-btn stop" id="btn-gen-stop" onclick="stopGenerator()">⏹ ЗУПИНИТИ</button>
-     <label class="gen-interval-input">
-       Інтервал (мс):
-       <input type="number" id="gen-interval-input" value="5000" min="500" step="500">
-     </label>
-   </div>
+      <!-- ESP code hint -->
+      <div class="esp-hint">
+        <div class="section-title">// Код для ESP (Arduino) — POST даних на сервер</div>
+        <pre id="esp-code"></pre>
+        <button class="copy-btn" onclick="copyESP()">📋 Копіювати код</button>
+      </div>
+    </section>
 
-   <div class="gen-grid">
-     <div class="gen-card">
-       <div class="gen-label">Статус генератора</div>
-       <div class="gen-value" id="gen-status">
-         <span class="gen-badge offline" id="gen-badge">ЗУПИНЕНО</span>
-       </div>
-     </div>
-     <div class="gen-card">
-       <div class="gen-label">Знайдено пристроїв</div>
-       <div class="gen-value" id="gen-devices">—</div>
-     </div>
-     <div class="gen-card">
-       <div class="gen-label">Відправлено пакетів</div>
-       <div class="gen-value accent2" id="gen-packets">—</div>
-     </div>
-     <div class="gen-card">
-       <div class="gen-label">Інтервал генерації</div>
-       <div class="gen-value" id="gen-interval">—</div>
-     </div>
-     <div class="gen-card">
-       <div class="gen-label">Остання генерація</div>
-       <div class="gen-value" id="gen-last">—</div>
-     </div>
-   </div>
+    <!-- ════════════ GENERATOR VIEW ════════════ -->
+    <section id="view-generator" style="display:none">
+      <div class="section-title">// Генератор телеметрії — керування</div>
 
-   <div class="section-title">// Останній згенерований пакет</div>
-   <div class="esp-hint">
-     <pre id="gen-payload">— ще немає даних —</pre>
-   </div>
+      <div class="gen-controls">
+        <button class="gen-btn start" id="btn-gen-start" onclick="startGenerator()">▶ ЗАПУСТИТИ</button>
+        <button class="gen-btn stop" id="btn-gen-stop" onclick="stopGenerator()">⏹ ЗУПИНИТИ</button>
+        <label class="gen-interval-input">
+          Інтервал (мс):
+          <input type="number" id="gen-interval-input" value="5000" min="500" step="500">
+        </label>
+      </div>
 
-   <!-- Керування моделями та пристроями -->
-   <div class="gen-manage">
-     <div class="manage-card">
-       <div class="section-title">// Додати модель</div>
-       <p class="manage-hint">Назва моделі + schema (JSON), що описує які поля генерувати.</p>
-       <input class="manage-input" id="model-name" placeholder="Назва моделі (напр. Solar Sensor)">
-       <textarea class="manage-textarea" id="model-schema" rows="8">{
+      <div class="gen-grid">
+        <div class="gen-card">
+          <div class="gen-label">Статус генератора</div>
+          <div class="gen-value" id="gen-status">
+            <span class="gen-badge offline" id="gen-badge">ЗУПИНЕНО</span>
+          </div>
+        </div>
+        <div class="gen-card">
+          <div class="gen-label">Знайдено пристроїв</div>
+          <div class="gen-value" id="gen-devices">—</div>
+        </div>
+        <div class="gen-card">
+          <div class="gen-label">Відправлено пакетів</div>
+          <div class="gen-value accent2" id="gen-packets">—</div>
+        </div>
+        <div class="gen-card">
+          <div class="gen-label">Інтервал генерації</div>
+          <div class="gen-value" id="gen-interval">—</div>
+        </div>
+        <div class="gen-card">
+          <div class="gen-label">Остання генерація</div>
+          <div class="gen-value" id="gen-last">—</div>
+        </div>
+      </div>
+
+      <div class="section-title">// Останній згенерований пакет</div>
+      <div class="esp-hint">
+        <pre id="gen-payload">— ще немає даних —</pre>
+      </div>
+
+      <!-- Керування моделями та пристроями -->
+      <div class="gen-manage">
+        <div class="manage-card">
+          <div class="section-title">// Додати модель</div>
+          <p class="manage-hint">Назва моделі + schema (JSON), що описує які поля генерувати.</p>
+          <input class="manage-input" id="model-name" placeholder="Назва моделі (напр. Solar Sensor)">
+          <textarea class="manage-textarea" id="model-schema" rows="8">{
   "temperature": { "min": 20, "max": 35 },
   "humidity":    { "min": 40, "max": 80 },
   "light":       { "min": 100, "max": 1000 },
@@ -526,89 +889,106 @@
   "capacity_ah": { "min": 5, "max": 10, "decimals": 3 },
   "charge_pct":  { "min": 40, "max": 100 }
 }</textarea>
-       <button class="manage-btn" onclick="createModel()">+ Зберегти модель</button>
-     </div>
+          <button class="manage-btn" onclick="createModel()">+ Зберегти модель</button>
+        </div>
 
-     <div class="manage-card">
-       <div class="section-title">// Додати пристрій</div>
-       <p class="manage-hint">Серійний номер пристрою та привʼязка до моделі.</p>
-       <input class="manage-input" id="dev-id" placeholder="Серійний номер (напр. DEV-0001)">
-       <input class="manage-input" id="dev-name" placeholder="Назва пристрою">
-       <input class="manage-input" id="dev-node" placeholder="HC Node (напр. HC-Node-A)">
-       <select class="manage-input" id="dev-model"></select>
-       <button class="manage-btn" onclick="createDevice()">+ Зберегти пристрій</button>
-     </div>
+        <div class="manage-card">
+          <div class="section-title">// Додати пристрій</div>
+          <p class="manage-hint">Серійний номер пристрою та привʼязка до моделі.</p>
+          <input class="manage-input" id="dev-id" placeholder="Серійний номер (напр. DEV-0001)">
+          <input class="manage-input" id="dev-name" placeholder="Назва пристрою">
+          <input class="manage-input" id="dev-node" placeholder="HC Node (напр. HC-Node-A)">
+          <select class="manage-input" id="dev-model"></select>
+          <button class="manage-btn" onclick="createDevice()">+ Зберегти пристрій</button>
+        </div>
 
-     <div class="manage-card">
-       <div class="section-title">// Швидкий старт</div>
-       <p class="manage-hint">Створює демо-модель «Solar Sensor» та 3 пристрої одним кліком — для тесту генератора.</p>
-       <button class="manage-btn seed" onclick="seedDemo()">⚡ Створити демо-набір</button>
-     </div>
-   </div>
- </section>
+        <div class="manage-card">
+          <div class="section-title">// Швидкий старт</div>
+          <p class="manage-hint">Створює демо-модель «Solar Sensor» та 3 пристрої одним кліком — для тесту генератора.
+          </p>
+          <button class="manage-btn seed" onclick="seedDemo()">⚡ Створити демо-набір</button>
+        </div>
+      </div>
+    </section>
 
-</main>
+  </main>
 
-<div id="toast"></div>
+  <div id="toast"></div>
 
-<script>
-// ─────────────────────────────────────────────
-//  CONFIG
-// ─────────────────────────────────────────────
-const API_BASE = '';   // той самий origin
-const API_KEY  = 'esp-secret-key-123';
-let selectedDevice = null;
-let chartInstance  = null;
-let currentField   = 'temperature';
-let historyData    = [];
+  <script>
+    // ─────────────────────────────────────────────
+    //  CONFIG
+    // ─────────────────────────────────────────────
+    const API_BASE = ''; // той самий origin
+    const API_KEY = 'esp-secret-key-123';
+    let selectedDevice = null;
+    let chartInstance = null;
+    let currentField = 'temperature';
+    let historyData = [];
 
-const FIELD_LABELS = {
-  temperature: { label:'Температура (°C)', color:'#ff6b6b' },
-  humidity:    { label:'Вологість (%)',     color:'#4ecdc4' },
-  light:       { label:'Освітленість (lx)', color:'#ffe66d' },
-  voltage:     { label:'Напруга (V)',       color:'#00d4ff' },
-  charge_pct:  { label:'Заряд (%)',         color:'#ff9500' },
-};
+    const FIELD_LABELS = {
+      temperature: {
+        label: 'Температура (°C)',
+        color: '#ff6b6b'
+      },
+      humidity: {
+        label: 'Вологість (%)',
+        color: '#4ecdc4'
+      },
+      light: {
+        label: 'Освітленість (lx)',
+        color: '#ffe66d'
+      },
+      voltage: {
+        label: 'Напруга (V)',
+        color: '#00d4ff'
+      },
+      charge_pct: {
+        label: 'Заряд (%)',
+        color: '#ff9500'
+      },
+    };
 
-// ─────────────────────────────────────────────
-//  LOAD DEVICES
-// ─────────────────────────────────────────────
-async function loadAll(silent = false) {
-  try {
-    const res  = await fetch(`${API_BASE}/api/devices/latest`);
-    const data = await res.json();
-    renderDevices(data);
+    // ─────────────────────────────────────────────
+    //  LOAD DEVICES
+    // ─────────────────────────────────────────────
+    async function loadAll(silent = false) {
+      try {
+        const res = await fetch(`${API_BASE}/api/devices/latest`);
+        const data = await res.json();
+        renderDevices(data);
 
-    // Тихо оновлюємо графік вибраного пристрою, щоб він теж був "живим"
-    if (selectedDevice) refreshHistory(selectedDevice);
+        // Тихо оновлюємо графік вибраного пристрою, щоб він теж був "живим"
+        if (selectedDevice) refreshHistory(selectedDevice);
 
-    if (!silent) showToast('✓ Дані оновлено');
-  } catch(e) {
-    if (!silent) showToast('⚠ Помилка зʼєднання');
-  }
-}
+        if (!silent) showToast('✓ Дані оновлено');
+      } catch (e) {
+        if (!silent) showToast('⚠ Помилка зʼєднання');
+      }
+    }
 
-// Тихе оновлення історії/графіку без зміни вибору картки
-async function refreshHistory(id) {
-  try {
-    const res = await fetch(`${API_BASE}/api/devices/${id}/history?limit=50`);
-    historyData = await res.json();
-    drawChart();
-  } catch(e) { /* тихо ігноруємо при авто-оновленні */ }
-}
+    // Тихе оновлення історії/графіку без зміни вибору картки
+    async function refreshHistory(id) {
+      try {
+        const res = await fetch(`${API_BASE}/api/devices/${id}/history?limit=50`);
+        historyData = await res.json();
+        drawChart();
+      } catch (e) {
+        /* тихо ігноруємо при авто-оновленні */ }
+    }
 
-function renderDevices(devices) {
-  const grid = document.getElementById('devices-grid');
-  if (!devices.length) {
-    grid.innerHTML = '<div style="color:var(--muted);font-family:monospace">Немає даних від пристроїв</div>';
-    return;
-  }
-  grid.innerHTML = devices.map(d => {
-    const ago = timeSince(d.received_at);
-    const offlineMin = minutesAgo(d.received_at);
-    const online = offlineMin < 15;
-    const chargePct = parseFloat(d.charge_pct) || 0;
-    return `
+    function renderDevices(devices) {
+      const grid = document.getElementById('devices-grid');
+      if (!devices.length) {
+        grid.innerHTML = '<div style="color:var(--muted);font-family:monospace">Немає даних від пристроїв</div>';
+        return;
+      }
+      grid.innerHTML = devices.map(d => {
+        const ago = timeSince(d.received_at);
+        const offlineMin = minutesAgo(d.received_at);
+        const online = offlineMin < 15;
+        const chargePct = parseFloat(d.charge_pct) || 0;
+        return `
     <div class="device-card${selectedDevice===d.device_id?' selected':''}"
          onclick="selectDevice('${d.device_id}','${d.name}')">
       <div class="card-header">
@@ -650,140 +1030,157 @@ function renderDevices(devices) {
       </div>
       <div class="card-footer">⏱ ${ago} | ${online?'ONLINE':'OFFLINE'}</div>
     </div>`;
-  }).join('');
-}
+      }).join('');
+    }
 
-// ──────────��──────────────────────────────────
-//  SELECT DEVICE → LOAD HISTORY
-// ─────────────────────────────────────────────
-async function selectDevice(id, name) {
-  selectedDevice = id;
-  document.getElementById('chart-device-label').textContent = `${id} — ${name}`;
-  document.querySelectorAll('.device-card').forEach(c => c.classList.remove('selected'));
-  event.currentTarget.classList.add('selected');
+    // ──────────��──────────────────────────────────
+    //  SELECT DEVICE → LOAD HISTORY
+    // ─────────────────────────────────────────────
+    async function selectDevice(id, name) {
+      selectedDevice = id;
+      document.getElementById('chart-device-label').textContent = `${id} — ${name}`;
+      document.querySelectorAll('.device-card').forEach(c => c.classList.remove('selected'));
+      event.currentTarget.classList.add('selected');
 
-  try {
-    const res = await fetch(`${API_BASE}/api/devices/${id}/history?limit=50`);
-    historyData = await res.json();
-    drawChart();
-  } catch(e) { showToast('⚠ Помилка завантаження графіку'); }
-}
+      try {
+        const res = await fetch(`${API_BASE}/api/devices/${id}/history?limit=50`);
+        historyData = await res.json();
+        drawChart();
+      } catch (e) {
+        showToast('⚠ Помилка завантаження графіку');
+      }
+    }
 
-// ─────────────────────────────────────────────
-//  CHART (vanilla canvas — без залежностей)
-// ─────────────────────────────────────────────
-function drawChart() {
-  const canvas = document.getElementById('chart');
-  const ctx    = canvas.getContext('2d');
-  const field  = currentField;
-  const cfg    = FIELD_LABELS[field];
+    // ─────────────────────────────────────────────
+    //  CHART (vanilla canvas — без залежностей)
+    // ─────────────────────────────────────────────
+    function drawChart() {
+      const canvas = document.getElementById('chart');
+      const ctx = canvas.getContext('2d');
+      const field = currentField;
+      const cfg = FIELD_LABELS[field];
 
-  canvas.width  = canvas.offsetWidth;
-  canvas.height = 260;
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
+      canvas.width = canvas.offsetWidth;
+      canvas.height = 260;
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-  if (!historyData.length) {
-    ctx.fillStyle = '#4a6278';
-    ctx.font = '14px Share Tech Mono';
-    ctx.fillText('Немає даних', 20, 140);
-    return;
-  }
+      if (!historyData.length) {
+        ctx.fillStyle = '#4a6278';
+        ctx.font = '14px Share Tech Mono';
+        ctx.fillText('Немає даних', 20, 140);
+        return;
+      }
 
-  const values = historyData.map(r => parseFloat(r[field]) || 0);
-  const labels = historyData.map(r => {
-    const d = new Date(r.received_at);
-    return `${d.getHours().toString().padStart(2,'0')}:${d.getMinutes().toString().padStart(2,'0')}`;
-  });
+      const values = historyData.map(r => parseFloat(r[field]) || 0);
+      const labels = historyData.map(r => {
+        const d = new Date(r.received_at);
+        return `${d.getHours().toString().padStart(2,'0')}:${d.getMinutes().toString().padStart(2,'0')}`;
+      });
 
-  const W = canvas.width, H = canvas.height;
-  const pad = { top:30, right:20, bottom:50, left:55 };
-  const gW  = W - pad.left - pad.right;
-  const gH  = H - pad.top  - pad.bottom;
+      const W = canvas.width,
+        H = canvas.height;
+      const pad = {
+        top: 30,
+        right: 20,
+        bottom: 50,
+        left: 55
+      };
+      const gW = W - pad.left - pad.right;
+      const gH = H - pad.top - pad.bottom;
 
-  const minV = Math.min(...values) * .95;
-  const maxV = Math.max(...values) * 1.05 || 1;
+      const minV = Math.min(...values) * .95;
+      const maxV = Math.max(...values) * 1.05 || 1;
 
-  const toX = i => pad.left + (i / (values.length - 1)) * gW;
-  const toY = v => pad.top  + gH - ((v - minV) / (maxV - minV)) * gH;
+      const toX = i => pad.left + (i / (values.length - 1)) * gW;
+      const toY = v => pad.top + gH - ((v - minV) / (maxV - minV)) * gH;
 
-  // Grid lines
-  ctx.strokeStyle = '#1a2d42';
-  ctx.lineWidth   = 1;
-  for (let i = 0; i <= 4; i++) {
-    const y = pad.top + (gH / 4) * i;
-    ctx.beginPath(); ctx.moveTo(pad.left, y); ctx.lineTo(pad.left + gW, y); ctx.stroke();
-    const val = maxV - ((maxV - minV) / 4) * i;
-    ctx.fillStyle = '#4a6278';
-    ctx.font = '10px Share Tech Mono';
-    ctx.textAlign = 'right';
-    ctx.fillText(val.toFixed(1), pad.left - 6, y + 4);
-  }
+      // Grid lines
+      ctx.strokeStyle = '#1a2d42';
+      ctx.lineWidth = 1;
+      for (let i = 0; i <= 4; i++) {
+        const y = pad.top + (gH / 4) * i;
+        ctx.beginPath();
+        ctx.moveTo(pad.left, y);
+        ctx.lineTo(pad.left + gW, y);
+        ctx.stroke();
+        const val = maxV - ((maxV - minV) / 4) * i;
+        ctx.fillStyle = '#4a6278';
+        ctx.font = '10px Share Tech Mono';
+        ctx.textAlign = 'right';
+        ctx.fillText(val.toFixed(1), pad.left - 6, y + 4);
+      }
 
-  // Area fill
-  const grad = ctx.createLinearGradient(0, pad.top, 0, pad.top + gH);
-  grad.addColorStop(0,   cfg.color + '44');
-  grad.addColorStop(1,   cfg.color + '00');
-  ctx.beginPath();
-  ctx.moveTo(toX(0), toY(values[0]));
-  values.forEach((v, i) => { if (i > 0) ctx.lineTo(toX(i), toY(v)); });
-  ctx.lineTo(toX(values.length - 1), pad.top + gH);
-  ctx.lineTo(toX(0), pad.top + gH);
-  ctx.closePath();
-  ctx.fillStyle = grad;
-  ctx.fill();
+      // Area fill
+      const grad = ctx.createLinearGradient(0, pad.top, 0, pad.top + gH);
+      grad.addColorStop(0, cfg.color + '44');
+      grad.addColorStop(1, cfg.color + '00');
+      ctx.beginPath();
+      ctx.moveTo(toX(0), toY(values[0]));
+      values.forEach((v, i) => {
+        if (i > 0) ctx.lineTo(toX(i), toY(v));
+      });
+      ctx.lineTo(toX(values.length - 1), pad.top + gH);
+      ctx.lineTo(toX(0), pad.top + gH);
+      ctx.closePath();
+      ctx.fillStyle = grad;
+      ctx.fill();
 
-  // Line
-  ctx.beginPath();
-  ctx.strokeStyle = cfg.color;
-  ctx.lineWidth   = 2;
-  ctx.shadowColor = cfg.color;
-  ctx.shadowBlur  = 8;
-  values.forEach((v, i) => { i === 0 ? ctx.moveTo(toX(i), toY(v)) : ctx.lineTo(toX(i), toY(v)); });
-  ctx.stroke();
-  ctx.shadowBlur = 0;
+      // Line
+      ctx.beginPath();
+      ctx.strokeStyle = cfg.color;
+      ctx.lineWidth = 2;
+      ctx.shadowColor = cfg.color;
+      ctx.shadowBlur = 8;
+      values.forEach((v, i) => {
+        i === 0 ? ctx.moveTo(toX(i), toY(v)) : ctx.lineTo(toX(i), toY(v));
+      });
+      ctx.stroke();
+      ctx.shadowBlur = 0;
 
-  // Dots
-  ctx.fillStyle = cfg.color;
-  values.forEach((v, i) => {
-    ctx.beginPath();
-    ctx.arc(toX(i), toY(v), 3, 0, Math.PI * 2);
-    ctx.fill();
-  });
+      // Dots
+      ctx.fillStyle = cfg.color;
+      values.forEach((v, i) => {
+        ctx.beginPath();
+        ctx.arc(toX(i), toY(v), 3, 0, Math.PI * 2);
+        ctx.fill();
+      });
 
-  // X labels (кожен Nth)
-  const step = Math.ceil(values.length / 8);
-  ctx.fillStyle = '#4a6278';
-  ctx.font = '10px Share Tech Mono';
-  ctx.textAlign = 'center';
-  labels.forEach((l, i) => {
-    if (i % step === 0) ctx.fillText(l, toX(i), H - 10);
-  });
+      // X labels (кожен Nth)
+      const step = Math.ceil(values.length / 8);
+      ctx.fillStyle = '#4a6278';
+      ctx.font = '10px Share Tech Mono';
+      ctx.textAlign = 'center';
+      labels.forEach((l, i) => {
+        if (i % step === 0) ctx.fillText(l, toX(i), H - 10);
+      });
 
-  // Title
-  ctx.fillStyle = cfg.color;
-  ctx.font = '11px Share Tech Mono';
-  ctx.textAlign = 'left';
-  ctx.fillText(cfg.label, pad.left, 18);
-}
+      // Title
+      ctx.fillStyle = cfg.color;
+      ctx.font = '11px Share Tech Mono';
+      ctx.textAlign = 'left';
+      ctx.fillText(cfg.label, pad.left, 18);
+    }
 
-// ─────────────────────────────────────────────
-//  TABS
-// ─────────────────────────────────────────────
-document.querySelectorAll('.tab').forEach(btn => {
-  btn.addEventListener('click', () => {
-    document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    currentField = btn.dataset.field;
-    drawChart();
-  });
-});
+    // ─────────────────────────────────────────────
+    //  TABS
+    // ─────────────────────────────────────────────
+    document.querySelectorAll('.tab').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        currentField = btn.dataset.field;
+        drawChart();
+      });
+    });
 
-window.addEventListener('resize', () => { if (selectedDevice) drawChart(); });
+    window.addEventListener('resize', () => {
+      if (selectedDevice) drawChart();
+    });
 
-// ─────────────────────────────────────────────
-//  ESP CODE HINT
-// ─────────────────────────────────────────────
-const espCode = `<span class="cmt">// Arduino / ESP8266 / ESP32</span>
+    // ─────────────────────────────────────────────
+    //  ESP CODE HINT
+    // ─────────────────────────────────────────────
+    const espCode = `<span class="cmt">// Arduino / ESP8266 / ESP32</span>
 <span class="cmt">// Бібліотеки: ESP8266WiFi.h (або WiFi.h), ESP8266HTTPClient.h</span>
 
 <span class="kw">#include</span> <span class="str">&lt;ESP8266WiFi.h&gt;</span>
@@ -826,198 +1223,237 @@ const espCode = `<span class="cmt">// Arduino / ESP8266 / ESP32</span>
   delay(30000);
 }`;
 
-document.getElementById('esp-code').innerHTML = espCode;
+    document.getElementById('esp-code').innerHTML = espCode;
 
-function copyESP() {
-  const plain = document.getElementById('esp-code').innerText;
-  navigator.clipboard.writeText(plain).then(() => showToast('✓ Код скопійовано'));
-}
+    function copyESP() {
+      const plain = document.getElementById('esp-code').innerText;
+      navigator.clipboard.writeText(plain).then(() => showToast('✓ Код скопійовано'));
+    }
 
-// ─────────────────────────────────────────────
-//  HELPERS
-// ─────────────────────────────────────────────
-function fmt(val, dec=1) {
-  if (val === null || val === undefined) return '—';
-  return parseFloat(val).toFixed(dec);
-}
+    // ─────────────────────────────────────────────
+    //  HELPERS
+    // ─────────────────────────────────────────────
+    function fmt(val, dec = 1) {
+      if (val === null || val === undefined) return '—';
+      return parseFloat(val).toFixed(dec);
+    }
 
-function minutesAgo(ts) {
-  return (Date.now() - new Date(ts).getTime()) / 60000;
-}
+    function minutesAgo(ts) {
+      return (Date.now() - new Date(ts).getTime()) / 60000;
+    }
 
-function timeSince(ts) {
-  const m = Math.round(minutesAgo(ts));
-  if (m < 1)  return 'щойно';
-  if (m < 60) return `${m} хв тому`;
-  return `${Math.round(m/60)} год тому`;
-}
+    function timeSince(ts) {
+      const m = Math.round(minutesAgo(ts));
+      if (m < 1) return 'щойно';
+      if (m < 60) return `${m} хв тому`;
+      return `${Math.round(m/60)} год тому`;
+    }
 
-function showToast(msg) {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 2800);
-}
+    function showToast(msg) {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 2800);
+    }
 
-// ─────────────────────────────────────────────
-//  VIEW SWITCHING (Dashboard / Генератор)
-// ─────────────────────────────────────────────
-let generatorTimer = null;
+    // ─────────────────────────────────────────────
+    //  VIEW SWITCHING (Dashboard / Генератор)
+    // ─────────────────────────────────────────────
+    let generatorTimer = null;
 
-function switchView(view) {
-  document.querySelectorAll('.nav-tab').forEach(t =>
-    t.classList.toggle('active', t.dataset.view === view)
-  );
-  document.getElementById('view-dashboard').style.display = view === 'dashboard' ? '' : 'none';
-  document.getElementById('view-generator').style.display = view === 'generator' ? '' : 'none';
+    function switchView(view) {
+      document.querySelectorAll('.nav-tab').forEach(t =>
+        t.classList.toggle('active', t.dataset.view === view)
+      );
+      document.getElementById('view-dashboard').style.display = view === 'dashboard' ? '' : 'none';
+      document.getElementById('view-generator').style.display = view === 'generator' ? '' : 'none';
 
-  if (view === 'generator') {
-    loadGenerator();
-    loadModelsIntoSelect();
-    if (!generatorTimer) generatorTimer = setInterval(loadGenerator, 3000);
-  } else if (generatorTimer) {
-    clearInterval(generatorTimer);
-    generatorTimer = null;
-  }
-}
+      if (view === 'generator') {
+        loadGenerator();
+        loadModelsIntoSelect();
+        if (!generatorTimer) generatorTimer = setInterval(loadGenerator, 3000);
+      } else if (generatorTimer) {
+        clearInterval(generatorTimer);
+        generatorTimer = null;
+      }
+    }
 
-async function loadGenerator() {
-  try {
-    const res = await fetch(`${API_BASE}/api/generator/status`);
-    const s = await res.json();
+    async function loadGenerator() {
+      try {
+        const res = await fetch(`${API_BASE}/api/generator/status`);
+        const s = await res.json();
 
-    const badge = document.getElementById('gen-badge');
-    badge.textContent = s.running ? 'ПРАЦЮЄ' : 'ЗУПИНЕНО';
-    badge.classList.toggle('offline', !s.running);
+        const badge = document.getElementById('gen-badge');
+        badge.textContent = s.running ? 'ПРАЦЮЄ' : 'ЗУПИНЕНО';
+        badge.classList.toggle('offline', !s.running);
 
-    document.getElementById('btn-gen-start').disabled = s.running;
-    document.getElementById('btn-gen-stop').disabled  = !s.running;
+        document.getElementById('btn-gen-start').disabled = s.running;
+        document.getElementById('btn-gen-stop').disabled = !s.running;
 
-    document.getElementById('gen-devices').textContent =
-      s.device_count != null ? s.device_count : '—';
-    document.getElementById('gen-packets').textContent =
-      s.packets_sent != null ? s.packets_sent : '—';
-    document.getElementById('gen-interval').textContent =
-      s.interval_ms != null ? `${(s.interval_ms / 1000).toFixed(1)} c` : '—';
-    document.getElementById('gen-last').textContent =
-      s.last_generation ? new Date(s.last_generation).toLocaleTimeString('uk-UA') : '—';
-    document.getElementById('gen-payload').textContent =
-      s.last_payload ? JSON.stringify(s.last_payload, null, 2) : '— ще немає даних —';
-  } catch (e) {
-    document.getElementById('gen-badge').textContent = 'НЕДОСТУПНО';
-    document.getElementById('gen-badge').classList.add('offline');
-  }
-}
+        document.getElementById('gen-devices').textContent =
+          s.device_count != null ? s.device_count : '—';
+        document.getElementById('gen-packets').textContent =
+          s.packets_sent != null ? s.packets_sent : '—';
+        document.getElementById('gen-interval').textContent =
+          s.interval_ms != null ? `${(s.interval_ms / 1000).toFixed(1)} c` : '—';
+        document.getElementById('gen-last').textContent =
+          s.last_generation ? new Date(s.last_generation).toLocaleTimeString('uk-UA') : '—';
+        document.getElementById('gen-payload').textContent =
+          s.last_payload ? JSON.stringify(s.last_payload, null, 2) : '— ще немає даних —';
+      } catch (e) {
+        document.getElementById('gen-badge').textContent = 'НЕДОСТУПНО';
+        document.getElementById('gen-badge').classList.add('offline');
+      }
+    }
 
-async function startGenerator() {
-  const ms = parseInt(document.getElementById('gen-interval-input').value, 10) || 5000;
-  try {
-    await fetch(`${API_BASE}/api/generator/start`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ interval_ms: ms }),
+    async function startGenerator() {
+      const ms = parseInt(document.getElementById('gen-interval-input').value, 10) || 5000;
+      try {
+        await fetch(`${API_BASE}/api/generator/start`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            interval_ms: ms
+          }),
+        });
+        showToast('▶ Генератор запущено');
+        loadGenerator();
+      } catch {
+        showToast('Помилка запуску');
+      }
+    }
+
+    async function stopGenerator() {
+      try {
+        await fetch(`${API_BASE}/api/generator/stop`, {
+          method: 'POST'
+        });
+        showToast('⏹ Генератор зупинено');
+        loadGenerator();
+      } catch {
+        showToast('Помилка зупинки');
+      }
+    }
+
+    // ─── Керування моделями та пристроями ─────────
+    async function loadModelsIntoSelect() {
+      try {
+        const res = await fetch(`${API_BASE}/api/models`);
+        const models = await res.json();
+        const sel = document.getElementById('dev-model');
+        sel.innerHTML = '<option value="">— без моделі —</option>' +
+          models.map(m => `<option value="${m.id}">${m.name}</option>`).join('');
+      } catch {
+        /* ignore */ }
+    }
+
+    async function createModel() {
+      const name = document.getElementById('model-name').value.trim();
+      const raw = document.getElementById('model-schema').value.trim();
+      if (!name) return showToast('Вкажи назву моделі');
+      let schema;
+      try {
+        schema = JSON.parse(raw);
+      } catch {
+        return showToast('Помилка: schema має бути валідним JSON');
+      }
+      try {
+        const res = await fetch(`${API_BASE}/api/models`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            name,
+            schema
+          }),
+        });
+        if (!res.ok) throw new Error();
+        showToast(`Модель "${name}" збережено`);
+        document.getElementById('model-name').value = '';
+        loadModelsIntoSelect();
+      } catch {
+        showToast('Помилка збереження моделі');
+      }
+    }
+
+    async function createDevice() {
+      const device_id = document.getElementById('dev-id').value.trim();
+      const name = document.getElementById('dev-name').value.trim();
+      const hc_node = document.getElementById('dev-node').value.trim();
+      const model_id = document.getElementById('dev-model').value || null;
+      if (!device_id) return showToast('Вкажи серійний номер');
+      try {
+        const res = await fetch(`${API_BASE}/api/devices`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            device_id,
+            name,
+            hc_node,
+            model_id
+          }),
+        });
+        if (!res.ok) throw new Error();
+        showToast(`Пристрій "${device_id}" збережено`);
+        document.getElementById('dev-id').value = '';
+        document.getElementById('dev-name').value = '';
+        document.getElementById('dev-node').value = '';
+        loadAll();
+      } catch {
+        showToast('Помилка збереження пристрою');
+      }
+    }
+
+    async function seedDemo() {
+      try {
+        const res = await fetch(`${API_BASE}/api/seed`, {
+          method: 'POST'
+        });
+        if (!res.ok) throw new Error();
+        showToast('Демо-набір створено (1 модель + 3 пристрої)');
+        loadModelsIntoSelect();
+        loadAll();
+      } catch {
+        showToast('Помилка створення демо-набору');
+      }
+    }
+
+    // ─────────────────────────────────────────────
+    //  INIT + ТИХЕ AUTO-REFRESH (AJAX, без перезавантаження)
+    // ─────────────────────────────────────────────
+    const REFRESH_MS = 3000; // частота фонового оновлення
+    let refreshTimer = null;
+
+    function startAutoRefresh() {
+      if (refreshTimer) return;
+      refreshTimer = setInterval(() => loadAll(true), REFRESH_MS); // silent = true
+    }
+
+    function stopAutoRefresh() {
+      if (refreshTimer) {
+        clearInterval(refreshTimer);
+        refreshTimer = null;
+      }
+    }
+
+    // Не оновлюємо у фоні, коли вкладка прихована — економимо ресурси
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) {
+        stopAutoRefresh();
+      } else {
+        loadAll(true); // одразу підтягнути свіже при поверненні
+        startAutoRefresh();
+      }
     });
-    showToast('▶ Генератор запущено');
-    loadGenerator();
-  } catch { showToast('Помилка запуску'); }
-}
 
-async function stopGenerator() {
-  try {
-    await fetch(`${API_BASE}/api/generator/stop`, { method: 'POST' });
-    showToast('⏹ Генератор зупинено');
-    loadGenerator();
-  } catch { showToast('Помилка зупинки'); }
-}
-
-// ─── Керування моделями та пристроями ─────────
-async function loadModelsIntoSelect() {
-  try {
-    const res = await fetch(`${API_BASE}/api/models`);
-    const models = await res.json();
-    const sel = document.getElementById('dev-model');
-    sel.innerHTML = '<option value="">— без моделі —</option>' +
-      models.map(m => `<option value="${m.id}">${m.name}</option>`).join('');
-  } catch { /* ignore */ }
-}
-
-async function createModel() {
-  const name = document.getElementById('model-name').value.trim();
-  const raw  = document.getElementById('model-schema').value.trim();
-  if (!name) return showToast('Вкажи назву моделі');
-  let schema;
-  try { schema = JSON.parse(raw); }
-  catch { return showToast('Помилка: schema має бути валідним JSON'); }
-  try {
-    const res = await fetch(`${API_BASE}/api/models`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name, schema }),
-    });
-    if (!res.ok) throw new Error();
-    showToast(`Модель "${name}" збережено`);
-    document.getElementById('model-name').value = '';
-    loadModelsIntoSelect();
-  } catch { showToast('Помилка збереження моделі'); }
-}
-
-async function createDevice() {
-  const device_id = document.getElementById('dev-id').value.trim();
-  const name      = document.getElementById('dev-name').value.trim();
-  const hc_node   = document.getElementById('dev-node').value.trim();
-  const model_id  = document.getElementById('dev-model').value || null;
-  if (!device_id) return showToast('Вкажи серійний номер');
-  try {
-    const res = await fetch(`${API_BASE}/api/devices`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ device_id, name, hc_node, model_id }),
-    });
-    if (!res.ok) throw new Error();
-    showToast(`Пристрій "${device_id}" збережено`);
-    document.getElementById('dev-id').value = '';
-    document.getElementById('dev-name').value = '';
-    document.getElementById('dev-node').value = '';
-    loadAll();
-  } catch { showToast('Помилка збереження пристрою'); }
-}
-
-async function seedDemo() {
-  try {
-    const res = await fetch(`${API_BASE}/api/seed`, { method: 'POST' });
-    if (!res.ok) throw new Error();
-    showToast('Демо-набір створено (1 модель + 3 пристрої)');
-    loadModelsIntoSelect();
-    loadAll();
-  } catch { showToast('Помилка створення демо-набору'); }
-}
-
-// ─────────────────────────────────────────────
-//  INIT + ТИХЕ AUTO-REFRESH (AJAX, без перезавантаження)
-// ─────────────────────────────────────────────
-const REFRESH_MS = 3000; // частота фонового оновлення
-let refreshTimer = null;
-
-function startAutoRefresh() {
-  if (refreshTimer) return;
-  refreshTimer = setInterval(() => loadAll(true), REFRESH_MS); // silent = true
-}
-function stopAutoRefresh() {
-  if (refreshTimer) { clearInterval(refreshTimer); refreshTimer = null; }
-}
-
-// Не оновлюємо у фоні, коли вкладка прихована — економимо ресурси
-document.addEventListener('visibilitychange', () => {
-  if (document.hidden) {
-    stopAutoRefresh();
-  } else {
-    loadAll(true);      // одразу підтягнути свіже при поверненні
-    startAutoRefresh();
-  }
-});
-
-loadAll();              // перше завантаження — з тостом
-startAutoRefresh();     // далі тихо кожні 3 сек
-</script>
+    loadAll(); // перше завантаження — з тостом
+    startAutoRefresh(); // далі тихо кожні 3 сек
+  </script>
 </body>
+
 </html>
