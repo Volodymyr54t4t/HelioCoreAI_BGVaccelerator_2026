@@ -391,6 +391,76 @@
   .manage-btn:hover { background:rgba(0,212,255,.18); box-shadow:var(--glow); }
   .manage-btn.seed { border-color:var(--accent2); color:var(--accent2); background:rgba(0,255,135,.08); }
   .manage-btn.seed:hover { background:rgba(0,255,135,.18); box-shadow:var(--glow2); }
+
+  /* ════════════ АДАПТИВНІСТЬ ════════════ */
+
+  /* Планшети та вузькі ноутбуки */
+  @media (max-width: 1024px) {
+    main { padding:20px; }
+    #devices-grid { grid-template-columns: repeat(auto-fill, minmax(280px,1fr)); }
+    .gen-grid { grid-template-columns: repeat(auto-fill, minmax(180px,1fr)); }
+  }
+
+  /* Планшети книжкові / великі телефони */
+  @media (max-width: 768px) {
+    body { font-size:14px; }
+
+    header {
+      flex-wrap:wrap;
+      gap:12px;
+      padding:12px 16px;
+    }
+    .logo { font-size:15px; order:1; flex:1 1 auto; }
+    .header-right { order:2; }
+    .nav-tabs { order:3; flex:1 1 100%; }
+    .nav-tab { flex:1; text-align:center; padding:8px 10px; }
+
+    main { padding:16px; }
+
+    .arch { padding:14px 16px; }
+    .chart-section, .esp-hint, .gen-card { padding:16px; }
+
+    #devices-grid { grid-template-columns: 1fr; gap:14px; }
+    .gen-grid { grid-template-columns: repeat(auto-fill, minmax(150px,1fr)); gap:14px; }
+    .gen-manage { grid-template-columns: 1fr; }
+
+    .gen-controls { gap:10px; }
+    .gen-btn { flex:1 1 auto; text-align:center; }
+    .gen-interval-input { flex:1 1 100%; }
+    .gen-interval-input input { width:100%; }
+  }
+
+  /* Телефони */
+  @media (max-width: 480px) {
+    header { padding:10px 12px; }
+    .logo { font-size:13px; gap:8px; }
+    .logo-icon { width:28px; height:28px; }
+    .live-label { display:none; }
+    .refresh-btn { padding:6px 10px; font-size:13px; }
+
+    main { padding:12px; }
+
+    .section-title { font-size:10px; letter-spacing:2px; }
+
+    .card-body { grid-template-columns: 1fr 1fr; gap:8px; padding:12px; }
+    .metric { padding:8px 10px; }
+    .metric-value { font-size:18px; }
+
+    .gen-grid { grid-template-columns: 1fr 1fr; }
+    .gen-value { font-size:22px; }
+
+    .tab-row { gap:6px; }
+    .tab { padding:5px 10px; font-size:12px; flex:1 1 auto; text-align:center; }
+
+    .esp-hint pre { font-size:11px; padding:12px; }
+
+    #toast { left:12px; right:12px; bottom:16px; text-align:center; }
+  }
+
+  /* Дуже вузькі екрани */
+  @media (max-width: 360px) {
+    .card-body, .gen-grid { grid-template-columns: 1fr; }
+  }
 </style>
 </head>
 <body>
