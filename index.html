@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>HelioCore AI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;600;700&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --bg:        #080c10;
+    --surface:   #0d1520;
+    --border:    #1a2d42;
+    --accent:    #00d4ff;
+    --accent2:   #00ff9d;
+    --warn:      #ff9500;
+    --danger:    #ff3b5c;
+    --text:      #c8dce8;
+    --muted:     #4a6278;
+    --glow:      0 0 18px rgba(0,212,255,.35);
+    --glow2:     0 0 18px rgba(0,255,157,.35);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 15px;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* scanline overlay */
+  body::before {
+    content:'';
+    position:fixed; inset:0; pointer-events:none; z-index:999;
+    background: repeating-linear-gradient(0deg,
+      transparent, transparent 2px,
+      rgba(0,0,0,.08) 2px, rgba(0,0,0,.08) 4px);
+  }
+
+  /* ── HEADER ── */
+  header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 14px 28px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    position: sticky; top:0; z-index:100;
+  }
+  .logo {
+    display:flex; align-items:center; gap:12px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 18px; color: var(--accent);
+    text-shadow: var(--glow);
+  }
+  .logo-icon {
+    width:32px; height:32px;
+    border:2px solid var(--accent);
+    border-radius:6px;
+    display:flex; align-items:center; justify-content:center;
+    font-size:14px;
+    box-shadow: var(--glow);
+  }
+  .header-right { display:flex; align-items:center; gap:18px; }
+  .live-dot {
+    width:8px; height:8px; border-radius:50%;
+    background: var(--accent2);
+    box-shadow: var(--glow2);
+    animation: pulse 1.8s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    0%,100%{ opacity:1; transform:scale(1); }
+    50%{ opacity:.4; transform:scale(.7); }
+  }
+  .live-label { font-size:13px; color:var(--accent2); font-family:'Share Tech Mono',monospace; }
+  .refresh-btn {
+    background:transparent; border:1px solid var(--accent);
+    color:var(--accent); padding:6px 14px; border-radius:4px;
+    cursor:pointer; font-family:'Rajdhani',sans-serif; font-size:14px;
+    font-weight:600; transition:.2s;
+  }
+  .refresh-btn:hover { background:var(--accent); color:var(--bg); box-shadow:var(--glow); }
+
+  /* ── LAYOUT ── */
+  main { padding:24px 28px; max-width:1400px; margin:0 auto; }
+
+  /* ── ARCH DIAGRAM ── */
+  .arch {
+    background: var(--surface);
+    border:1px solid var(--border);
+    border-radius:10px;
+    padding:18px 24px;
+    margin-bottom:28px;
+    font-family:'Share Tech Mono', monospace;
+    font-size:12px;
+    color: var(--muted);
+    overflow-x:auto;
+    white-space:nowrap;
+  }
+  .arch-title { font-size:11px; color:var(--muted); margin-bottom:10px; letter-spacing:2px; text-transform:uppercase; }
+  .arch-flow { display:flex; align-items:center; gap:6px; flex-wrap:wrap; }
+  .arch-box {
+    border:1px solid var(--border); padding:5px 10px; border-radius:4px;
+    color: var(--text); white-space:nowrap;
+  }
+  .arch-box.active { border-color:var(--accent); color:var(--accent); box-shadow:var(--glow); }
+  .arch-box.green { border-color:var(--accent2); color:var(--accent2); box-shadow:var(--glow2); }
+  .arch-arrow { color:var(--accent); font-size:16px; }
+
+  /* ── SECTION TITLE ── */
+  .section-title {
+    font-size:11px; letter-spacing:3px; text-transform:uppercase;
+    color:var(--muted); margin-bottom:14px;
+    display:flex; align-items:center; gap:10px;
+  }
+  .section-title::after {
+    content:''; flex:1; height:1px; background:var(--border);
+  }
+
+  /* ── DEVICE GRID ── */
+  #devices-grid {
+    display:grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px,1fr));
+    gap:18px;
+    margin-bottom:32px;
+  }
+
+  .device-card {
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:10px;
+    overflow:hidden;
+    transition:.25s;
+    cursor:pointer;
+  }
+  .device-card:hover { border-color:var(--accent); box-shadow:var(--glow); transform:translateY(-2px); }
+  .device-card.selected { border-color:var(--accent2); box-shadow:var(--glow2); }
+
+  .card-header {
+    display:flex; align-items:center; justify-content:space-between;
+    padding:12px 16px;
+    border-bottom:1px solid var(--border);
+    background: rgba(0,212,255,.04);
+  }
+  .card-id {
+    font-family:'Share Tech Mono',monospace;
+    color:var(--accent); font-size:13px;
+  }
+  .card-node {
+    font-size:11px; color:var(--muted);
+    background:rgba(255,255,255,.04);
+    padding:3px 8px; border-radius:3px;
+  }
+  .card-status {
+    width:8px; height:8px; border-radius:50%;
+    background: var(--accent2);
+    box-shadow: var(--glow2);
+    animation: pulse 2s ease-in-out infinite;
+  }
+  .card-status.offline { background:var(--muted); box-shadow:none; animation:none; }
+
+  .card-body { padding:14px 16px; display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+
+  .metric {
+    background:rgba(255,255,255,.03);
+    border:1px solid var(--border);
+    border-radius:6px;
+    padding:10px 12px;
+  }
+  .metric-label {
+    font-size:10px; letter-spacing:1.5px; text-transform:uppercase;
+    color:var(--muted); margin-bottom:4px;
+  }
+  .metric-value {
+    font-family:'Share Tech Mono',monospace;
+    font-size:20px; color:var(--text); line-height:1;
+  }
+  .metric-value .unit { font-size:11px; color:var(--muted); margin-left:2px; }
+
+  .metric.temp .metric-value { color:#ff6b6b; }
+  .metric.hum  .metric-value { color:#4ecdc4; }
+  .metric.light .metric-value { color:#ffe66d; }
+  .metric.volt  .metric-value { color:var(--accent); }
+  .metric.cap   .metric-value { color:var(--accent2); }
+  .metric.charge .metric-value { color:var(--warn); }
+
+  .charge-bar {
+    height:4px; background:rgba(255,255,255,.08);
+    border-radius:2px; margin-top:6px; overflow:hidden;
+  }
+  .charge-fill {
+    height:100%; border-radius:2px;
+    background: linear-gradient(90deg, var(--warn), var(--accent2));
+    transition: width .6s ease;
+  }
+
+  .card-footer {
+    padding:8px 16px;
+    border-top:1px solid var(--border);
+    font-size:11px; color:var(--muted);
+    font-family:'Share Tech Mono',monospace;
+  }
+
+  /* ── HISTORY CHART ── */
+  .chart-section {
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:10px;
+    padding:20px 24px;
+    margin-bottom:28px;
+  }
+  .chart-header {
+    display:flex; align-items:center; justify-content:space-between;
+    margin-bottom:18px;
+  }
+  .chart-title { font-size:16px; font-weight:700; color:var(--text); }
+  .chart-device {
+    font-family:'Share Tech Mono',monospace;
+    font-size:12px; color:var(--accent);
+  }
+  .tab-row { display:flex; gap:8px; margin-bottom:16px; flex-wrap:wrap; }
+  .tab {
+    background:transparent; border:1px solid var(--border);
+    color:var(--muted); padding:5px 14px; border-radius:4px;
+    cursor:pointer; font-family:'Rajdhani',sans-serif; font-size:13px;
+    font-weight:600; transition:.2s;
+  }
+  .tab.active,
+  .tab:hover { border-color:var(--accent); color:var(--accent); background:rgba(0,212,255,.08); }
+
+  canvas { width:100% !important; }
+
+  /* ── ESP CODE HINT ── */
+  .esp-hint {
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:10px;
+    padding:20px 24px;
+    margin-bottom:28px;
+  }
+  .esp-hint pre {
+    font-family:'Share Tech Mono',monospace;
+    font-size:12px; color:#a8c7d8;
+    background:rgba(0,0,0,.4);
+    border:1px solid var(--border);
+    border-radius:6px;
+    padding:16px;
+    overflow-x:auto;
+    line-height:1.7;
+  }
+  .esp-hint pre .kw { color:var(--accent); }
+  .esp-hint pre .str { color:var(--accent2); }
+  .esp-hint pre .cmt { color:var(--muted); }
+  .copy-btn {
+    background:transparent; border:1px solid var(--border);
+    color:var(--muted); padding:5px 12px; border-radius:4px;
+    cursor:pointer; font-size:12px; margin-top:10px; transition:.2s;
+  }
+  .copy-btn:hover { border-color:var(--accent2); color:var(--accent2); }
+
+  /* ── TOAST ── */
+  #toast {
+    position:fixed; bottom:24px; right:24px;
+    background:var(--surface); border:1px solid var(--accent2);
+    color:var(--accent2); padding:10px 18px;
+    border-radius:6px; font-size:13px;
+    box-shadow:var(--glow2);
+    transform:translateY(80px); opacity:0;
+    transition:.3s; z-index:9999;
+    font-family:'Share Tech Mono',monospace;
+  }
+  #toast.show { transform:translateY(0); opacity:1; }
+
+  /* ── LOADING ── */
+  .skeleton {
+    background: linear-gradient(90deg,
+      var(--surface) 25%, rgba(0,212,255,.05) 50%, var(--surface) 75%);
+    background-size:400% 100%;
+    animation: shimmer 1.4s infinite;
+    border-radius:6px;
+    height:90px;
+  }
+  @keyframes shimmer {
+    0%{background-position:100% 0}
+    100%{background-position:-100% 0}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <div class="logo-icon">⬡</div>
+    HG GATEWAY  /  HelioCore AI DASHBOARD
+  </div>
+  <div class="header-right">
+    <div class="live-dot"></div>
+    <span class="live-label">LIVE</span>
+    <button class="refresh-btn" onclick="loadAll()">↺ ОНОВИТИ</button>
+  </div>
+</header>
+
+<main>
+
+  <!-- Architecture diagram -->
+  <div class="arch">
+    <div class="arch-title">// Архітектура системи</div>
+    <div class="arch-flow">
+      <div class="arch-box">[HC Пристрої]</div>
+      <div class="arch-arrow">→</div>
+      <div class="arch-box active">[HG Шлюз/Хаб]</div>
+      <div class="arch-arrow">→</div>
+      <div class="arch-box active">[ESP-модуль]</div>
+      <div class="arch-arrow">→ Wi-Fi/GPRS →</div>
+      <div class="arch-box green">[API /api/data]</div>
+      <div class="arch-arrow">→</div>
+      <div class="arch-box green">[Server.js]</div>
+      <div class="arch-arrow">↔</div>
+      <div class="arch-box green">[PostgreSQL]</div>
+      <div class="arch-arrow">→</div>
+      <div class="arch-box active">[Site]</div>
+    </div>
+  </div>
+
+  <!-- Devices -->
+  <div class="section-title">// Пристрої — остання передача</div>
+  <div id="devices-grid">
+    <div class="skeleton"></div>
+    <div class="skeleton"></div>
+    <div class="skeleton"></div>
+  </div>
+
+  <!-- History chart -->
+  <div class="chart-section" id="chart-section">
+    <div class="chart-header">
+      <div>
+        <div class="chart-title">Графік даних</div>
+        <div class="chart-device" id="chart-device-label">Оберіть пристрій вище ↑</div>
+      </div>
+    </div>
+    <div class="tab-row" id="tabs">
+      <button class="tab active" data-field="temperature">🌡 Температура</button>
+      <button class="tab" data-field="humidity">💧 Вологість</button>
+      <button class="tab" data-field="light">☀ Освітленість</button>
+      <button class="tab" data-field="voltage">⚡ Напруга</button>
+      <button class="tab" data-field="charge_pct">🔋 Заряд %</button>
+    </div>
+    <canvas id="chart" height="260"></canvas>
+  </div>
+
+  <!-- ESP code hint -->
+  <div class="esp-hint">
+    <div class="section-title">// Код для ESP (Arduino) — POST даних на сервер</div>
+    <pre id="esp-code"></pre>
+    <button class="copy-btn" onclick="copyESP()">📋 Копіювати код</button>
+  </div>
+
+</main>
+
+<div id="toast"></div>
+
+<script>
+// ─────────────────────────────────────────────
+//  CONFIG
+// ─────────────────────────────────────────────
+const API_BASE = '';   // той самий origin
+const API_KEY  = 'esp-secret-key-123';
+let selectedDevice = null;
+let chartInstance  = null;
+let currentField   = 'temperature';
+let historyData    = [];
+
+const FIELD_LABELS = {
+  temperature: { label:'Температура (°C)', color:'#ff6b6b' },
+  humidity:    { label:'Вологість (%)',     color:'#4ecdc4' },
+  light:       { label:'Освітленість (lx)', color:'#ffe66d' },
+  voltage:     { label:'Напруга (V)',       color:'#00d4ff' },
+  charge_pct:  { label:'Заряд (%)',         color:'#ff9500' },
+};
+
+// ─────────────────────────────────────────────
+//  LOAD DEVICES
+// ─────────────────────────────────────────────
+async function loadAll() {
+  try {
+    const res  = await fetch(`${API_BASE}/api/devices/latest`);
+    const data = await res.json();
+    renderDevices(data);
+    showToast('✓ Дані оновлено');
+  } catch(e) {
+    showToast('⚠ Помилка зʼєднання');
+  }
+}
+
+function renderDevices(devices) {
+  const grid = document.getElementById('devices-grid');
+  if (!devices.length) {
+    grid.innerHTML = '<div style="color:var(--muted);font-family:monospace">Немає даних від пристроїв</div>';
+    return;
+  }
+  grid.innerHTML = devices.map(d => {
+    const ago = timeSince(d.received_at);
+    const offlineMin = minutesAgo(d.received_at);
+    const online = offlineMin < 15;
+    const chargePct = parseFloat(d.charge_pct) || 0;
+    return `
+    <div class="device-card${selectedDevice===d.device_id?' selected':''}"
+         onclick="selectDevice('${d.device_id}','${d.name}')">
+      <div class="card-header">
+        <div>
+          <div class="card-id">${d.device_id}</div>
+          <div style="font-size:11px;color:var(--muted);margin-top:2px">${d.name||'—'}</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <div class="card-node">${d.hc_node||'—'}</div>
+          <div class="card-status${online?'':' offline'}"></div>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="metric temp">
+          <div class="metric-label">Температура</div>
+          <div class="metric-value">${fmt(d.temperature)}<span class="unit">°C</span></div>
+        </div>
+        <div class="metric hum">
+          <div class="metric-label">Вологість</div>
+          <div class="metric-value">${fmt(d.humidity)}<span class="unit">%</span></div>
+        </div>
+        <div class="metric light">
+          <div class="metric-label">Освітленість</div>
+          <div class="metric-value">${fmt(d.light)}<span class="unit">lx</span></div>
+        </div>
+        <div class="metric volt">
+          <div class="metric-label">Напруга</div>
+          <div class="metric-value">${fmt(d.voltage,3)}<span class="unit">V</span></div>
+        </div>
+        <div class="metric cap">
+          <div class="metric-label">Ємність</div>
+          <div class="metric-value">${fmt(d.capacity_ah,2)}<span class="unit">Ah</span></div>
+        </div>
+        <div class="metric charge">
+          <div class="metric-label">Заряд</div>
+          <div class="metric-value">${fmt(d.charge_pct)}<span class="unit">%</span></div>
+          <div class="charge-bar"><div class="charge-fill" style="width:${chargePct}%"></div></div>
+        </div>
+      </div>
+      <div class="card-footer">⏱ ${ago} | ${online?'ONLINE':'OFFLINE'}</div>
+    </div>`;
+  }).join('');
+}
+
+// ─────────────────────────────────────────────
+//  SELECT DEVICE → LOAD HISTORY
+// ─────────────────────────────────────────────
+async function selectDevice(id, name) {
+  selectedDevice = id;
+  document.getElementById('chart-device-label').textContent = `${id} — ${name}`;
+  document.querySelectorAll('.device-card').forEach(c => c.classList.remove('selected'));
+  event.currentTarget.classList.add('selected');
+
+  try {
+    const res = await fetch(`${API_BASE}/api/devices/${id}/history?limit=50`);
+    historyData = await res.json();
+    drawChart();
+  } catch(e) { showToast('⚠ Помилка завантаження графіку'); }
+}
+
+// ─────────────────────────────────────────────
+//  CHART (vanilla canvas — без залежностей)
+// ─────────────────────────────────────────────
+function drawChart() {
+  const canvas = document.getElementById('chart');
+  const ctx    = canvas.getContext('2d');
+  const field  = currentField;
+  const cfg    = FIELD_LABELS[field];
+
+  canvas.width  = canvas.offsetWidth;
+  canvas.height = 260;
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  if (!historyData.length) {
+    ctx.fillStyle = '#4a6278';
+    ctx.font = '14px Share Tech Mono';
+    ctx.fillText('Немає даних', 20, 140);
+    return;
+  }
+
+  const values = historyData.map(r => parseFloat(r[field]) || 0);
+  const labels = historyData.map(r => {
+    const d = new Date(r.received_at);
+    return `${d.getHours().toString().padStart(2,'0')}:${d.getMinutes().toString().padStart(2,'0')}`;
+  });
+
+  const W = canvas.width, H = canvas.height;
+  const pad = { top:30, right:20, bottom:50, left:55 };
+  const gW  = W - pad.left - pad.right;
+  const gH  = H - pad.top  - pad.bottom;
+
+  const minV = Math.min(...values) * .95;
+  const maxV = Math.max(...values) * 1.05 || 1;
+
+  const toX = i => pad.left + (i / (values.length - 1)) * gW;
+  const toY = v => pad.top  + gH - ((v - minV) / (maxV - minV)) * gH;
+
+  // Grid lines
+  ctx.strokeStyle = '#1a2d42';
+  ctx.lineWidth   = 1;
+  for (let i = 0; i <= 4; i++) {
+    const y = pad.top + (gH / 4) * i;
+    ctx.beginPath(); ctx.moveTo(pad.left, y); ctx.lineTo(pad.left + gW, y); ctx.stroke();
+    const val = maxV - ((maxV - minV) / 4) * i;
+    ctx.fillStyle = '#4a6278';
+    ctx.font = '10px Share Tech Mono';
+    ctx.textAlign = 'right';
+    ctx.fillText(val.toFixed(1), pad.left - 6, y + 4);
+  }
+
+  // Area fill
+  const grad = ctx.createLinearGradient(0, pad.top, 0, pad.top + gH);
+  grad.addColorStop(0,   cfg.color + '44');
+  grad.addColorStop(1,   cfg.color + '00');
+  ctx.beginPath();
+  ctx.moveTo(toX(0), toY(values[0]));
+  values.forEach((v, i) => { if (i > 0) ctx.lineTo(toX(i), toY(v)); });
+  ctx.lineTo(toX(values.length - 1), pad.top + gH);
+  ctx.lineTo(toX(0), pad.top + gH);
+  ctx.closePath();
+  ctx.fillStyle = grad;
+  ctx.fill();
+
+  // Line
+  ctx.beginPath();
+  ctx.strokeStyle = cfg.color;
+  ctx.lineWidth   = 2;
+  ctx.shadowColor = cfg.color;
+  ctx.shadowBlur  = 8;
+  values.forEach((v, i) => { i === 0 ? ctx.moveTo(toX(i), toY(v)) : ctx.lineTo(toX(i), toY(v)); });
+  ctx.stroke();
+  ctx.shadowBlur = 0;
+
+  // Dots
+  ctx.fillStyle = cfg.color;
+  values.forEach((v, i) => {
+    ctx.beginPath();
+    ctx.arc(toX(i), toY(v), 3, 0, Math.PI * 2);
+    ctx.fill();
+  });
+
+  // X labels (кожен Nth)
+  const step = Math.ceil(values.length / 8);
+  ctx.fillStyle = '#4a6278';
+  ctx.font = '10px Share Tech Mono';
+  ctx.textAlign = 'center';
+  labels.forEach((l, i) => {
+    if (i % step === 0) ctx.fillText(l, toX(i), H - 10);
+  });
+
+  // Title
+  ctx.fillStyle = cfg.color;
+  ctx.font = '11px Share Tech Mono';
+  ctx.textAlign = 'left';
+  ctx.fillText(cfg.label, pad.left, 18);
+}
+
+// ─────────────────────────────────────────────
+//  TABS
+// ─────────────────────────────────────────────
+document.querySelectorAll('.tab').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    currentField = btn.dataset.field;
+    drawChart();
+  });
+});
+
+window.addEventListener('resize', () => { if (selectedDevice) drawChart(); });
+
+// ─────────────────────────────────────────────
+//  ESP CODE HINT
+// ─────────────────────────────────────────────
+const espCode = `<span class="cmt">// Arduino / ESP8266 / ESP32</span>
+<span class="cmt">// Бібліотеки: ESP8266WiFi.h (або WiFi.h), ESP8266HTTPClient.h</span>
+
+<span class="kw">#include</span> <span class="str">&lt;ESP8266WiFi.h&gt;</span>
+<span class="kw">#include</span> <span class="str">&lt;ESP8266HTTPClient.h&gt;</span>
+<span class="kw">#include</span> <span class="str">&lt;ArduinoJson.h&gt;</span>
+
+<span class="kw">const char*</span> SSID     = <span class="str">"YOUR_WIFI"</span>;
+<span class="kw">const char*</span> PASS     = <span class="str">"YOUR_PASS"</span>;
+<span class="kw">const char*</span> SERVER   = <span class="str">"http://YOUR_SERVER_IP:3000/api/data"</span>;
+<span class="kw">const char*</span> API_KEY  = <span class="str">"esp-secret-key-123"</span>;
+<span class="kw">const char*</span> DEVICE   = <span class="str">"DEV-0001"</span>;
+
+<span class="kw">void</span> sendData(<span class="kw">float</span> temp, <span class="kw">float</span> hum, <span class="kw">float</span> lux,
+              <span class="kw">float</span> volt, <span class="kw">float</span> cap, <span class="kw">float</span> chargePct) {
+  WiFiClient client;
+  HTTPClient http;
+  http.begin(client, SERVER);
+  http.addHeader(<span class="str">"Content-Type"</span>, <span class="str">"application/json"</span>);
+  http.addHeader(<span class="str">"x-api-key"</span>, API_KEY);
+
+  StaticJsonDocument&lt;256&gt; doc;
+  doc[<span class="str">"device_id"</span>]   = DEVICE;
+  doc[<span class="str">"temperature"</span>]  = temp;
+  doc[<span class="str">"humidity"</span>]     = hum;
+  doc[<span class="str">"light"</span>]        = lux;
+  doc[<span class="str">"voltage"</span>]      = volt;     <span class="cmt">// з контролера</span>
+  doc[<span class="str">"capacity_ah"</span>]  = cap;      <span class="cmt">// з контролера</span>
+  doc[<span class="str">"charge_pct"</span>]   = chargePct;<span class="cmt">// з контролера</span>
+
+  String body;
+  serializeJson(doc, body);
+
+  <span class="kw">int</span> code = http.POST(body);
+  http.end();
+}
+
+<span class="kw">void</span> loop() {
+  <span class="cmt">// Читай датчики, передавай кожні 30 сек</span>
+  sendData(24.5, 62.0, 420.0, 3.85, 8.2, 74.0);
+  delay(30000);
+}`;
+
+document.getElementById('esp-code').innerHTML = espCode;
+
+function copyESP() {
+  const plain = document.getElementById('esp-code').innerText;
+  navigator.clipboard.writeText(plain).then(() => showToast('✓ Код скопійовано'));
+}
+
+// ─────────────────────────────────────────────
+//  HELPERS
+// ─────────────────────────────────────────────
+function fmt(val, dec=1) {
+  if (val === null || val === undefined) return '—';
+  return parseFloat(val).toFixed(dec);
+}
+
+function minutesAgo(ts) {
+  return (Date.now() - new Date(ts).getTime()) / 60000;
+}
+
+function timeSince(ts) {
+  const m = Math.round(minutesAgo(ts));
+  if (m < 1)  return 'щойно';
+  if (m < 60) return `${m} хв тому`;
+  return `${Math.round(m/60)} год тому`;
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2800);
+}
+
+// ─────────────────────────────────────────────
+//  INIT + AUTO-REFRESH кожні 30 сек
+// ─────────────────────────────────────────────
+loadAll();
+setInterval(loadAll, 30000);
+</script>
+</body>
+</html>
