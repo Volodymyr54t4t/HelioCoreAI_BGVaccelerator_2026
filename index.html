@@ -1159,7 +1159,8 @@
         historyData = await res.json();
         drawChart();
       } catch (e) {
-        /* тихо ігноруємо при авто-оновленні */ }
+        /* тихо ігноруємо при авто-оновленні */
+      }
     }
 
     function renderDevices(devices) {
@@ -1531,7 +1532,8 @@
         sel.innerHTML = '<option value="">— без моделі —</option>' +
           models.map(m => `<option value="${m.id}">${m.name}</option>`).join('');
       } catch {
-        /* ignore */ }
+        /* ignore */
+      }
     }
 
     async function createModel() {

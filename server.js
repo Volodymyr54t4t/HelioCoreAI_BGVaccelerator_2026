@@ -378,6 +378,11 @@ app.get("/api/generator/status", (req, res) => {
   });
 });
 
+// ─── Маркетингова landing-сторінка ───────────────────────────
+app.get("/landing", (req, res) => {
+  res.sendFile(path.join(__dirname, "landing.html"));
+});
+
 // ─── Фронтенд (SPA) ──────────────────────────────────────────
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "index.html"));

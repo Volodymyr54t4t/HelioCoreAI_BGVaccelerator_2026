@@ -1,0 +1,1099 @@
+<!DOCTYPE html>
+<html lang="uk">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>HelioCore AI — Енергія сонця. Розум машини.</title>
+    <meta name="description"
+        content="HelioCore AI — автономний сонячний IoT-вузол, що сам стежить за сонцем, живиться від нього й передає дані в реальному часі. Нескінченна енергія. Нуль кабелів. Повний контроль." />
+    <meta name="theme-color" content="#080c10" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;500;600;700&display=swap"
+        rel="stylesheet" />
+    <style>
+        :root {
+            --bg: #080c10;
+            --bg2: #0a1018;
+            --surface: #0d1520;
+            --border: #1a2d42;
+            --accent: #00d4ff;
+            --accent2: #00ff9d;
+            --warn: #ff9500;
+            --text: #c8dce8;
+            --muted: #4a6278;
+            --glow: 0 0 22px rgba(0, 212, 255, .35);
+            --glow2: 0 0 22px rgba(0, 255, 157, .35);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html {
+            scroll-behavior: smooth;
+            background: var(--bg);
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 16px;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* subtle grid + scanline backdrop */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 1;
+            background:
+                repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0, 0, 0, .06) 2px, rgba(0, 0, 0, .06) 4px),
+                radial-gradient(circle at 50% -10%, rgba(0, 212, 255, .08), transparent 55%);
+        }
+
+        .mono {
+            font-family: 'Share Tech Mono', monospace;
+        }
+
+        a {
+            color: inherit;
+            text-decoration: none;
+        }
+
+        /* ── NAV ── */
+        nav {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 14px 28px;
+            background: rgba(8, 12, 16, .82);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 17px;
+            color: var(--accent);
+            text-shadow: var(--glow);
+            letter-spacing: 1px;
+        }
+
+        .brand-mark {
+            width: 34px;
+            height: 34px;
+            border: 2px solid var(--accent);
+            border-radius: 8px;
+            display: grid;
+            place-items: center;
+            box-shadow: var(--glow);
+            animation: spin 9s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 24px;
+            font-weight: 600;
+            font-size: 14px;
+            letter-spacing: .5px;
+        }
+
+        .nav-links a {
+            color: var(--muted);
+            transition: .2s;
+        }
+
+        .nav-links a:hover {
+            color: var(--accent);
+            text-shadow: var(--glow);
+        }
+
+        .nav-cta {
+            border: 1px solid var(--accent2);
+            color: var(--accent2);
+            padding: 8px 18px;
+            border-radius: 6px;
+            font-weight: 700;
+            font-size: 14px;
+            transition: .2s;
+        }
+
+        .nav-cta:hover {
+            background: var(--accent2);
+            color: var(--bg);
+            box-shadow: var(--glow2);
+        }
+
+        /* ── SHARED ── */
+        section {
+            position: relative;
+            z-index: 2;
+            padding: 96px 28px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .kicker {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 12px;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            color: var(--accent);
+            margin-bottom: 16px;
+        }
+
+        .h2 {
+            font-size: clamp(28px, 4.5vw, 46px);
+            font-weight: 700;
+            line-height: 1.1;
+            letter-spacing: -.5px;
+            text-wrap: balance;
+            margin-bottom: 18px;
+        }
+
+        .lead {
+            font-size: 18px;
+            color: var(--muted);
+            max-width: 640px;
+            text-wrap: pretty;
+        }
+
+        .accent {
+            color: var(--accent);
+        }
+
+        .accent2 {
+            color: var(--accent2);
+        }
+
+        .reveal {
+            opacity: 0;
+            transform: translateY(28px);
+            transition: opacity .7s ease, transform .7s ease;
+        }
+
+        .reveal.in {
+            opacity: 1;
+            transform: none;
+        }
+
+        /* ── HERO ── */
+        .hero {
+            min-height: 92vh;
+            max-width: none;
+            display: grid;
+            grid-template-columns: 1.1fr .9fr;
+            align-items: center;
+            gap: 48px;
+            padding: 64px 8vw 80px;
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 12px;
+            letter-spacing: 2px;
+            color: var(--accent2);
+            border: 1px solid var(--border);
+            background: rgba(0, 255, 157, .05);
+            padding: 6px 14px;
+            border-radius: 100px;
+            margin-bottom: 26px;
+        }
+
+        .hero-badge .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--accent2);
+            box-shadow: var(--glow2);
+            animation: pulse 1.8s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+
+            50% {
+                opacity: .35;
+                transform: scale(.6);
+            }
+        }
+
+        .hero h1 {
+            font-size: clamp(42px, 7vw, 84px);
+            font-weight: 700;
+            line-height: .98;
+            letter-spacing: -1.5px;
+            text-wrap: balance;
+            margin-bottom: 22px;
+        }
+
+        .hero h1 .grad {
+            background: linear-gradient(100deg, var(--accent), var(--accent2));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero-sub {
+            font-size: 20px;
+            color: var(--text);
+            max-width: 520px;
+            margin-bottom: 36px;
+            text-wrap: pretty;
+        }
+
+        .hero-sub b {
+            color: var(--accent);
+            font-weight: 600;
+        }
+
+        .btn-row {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            font-family: 'Rajdhani', sans-serif;
+            font-weight: 700;
+            font-size: 16px;
+            letter-spacing: .6px;
+            padding: 14px 30px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: .22s;
+            border: 1px solid transparent;
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: var(--bg);
+            box-shadow: var(--glow);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0 34px rgba(0, 212, 255, .6);
+        }
+
+        .btn-ghost {
+            background: transparent;
+            border-color: var(--border);
+            color: var(--text);
+        }
+
+        .btn-ghost:hover {
+            border-color: var(--accent2);
+            color: var(--accent2);
+            box-shadow: var(--glow2);
+        }
+
+        /* hero visual */
+        .hero-visual {
+            position: relative;
+            display: grid;
+            place-items: center;
+        }
+
+        .hero-img-wrap {
+            position: relative;
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            overflow: hidden;
+            box-shadow: var(--glow), 0 30px 80px rgba(0, 0, 0, .6);
+            background: var(--surface);
+        }
+
+        .hero-img-wrap img {
+            display: block;
+            width: 100%;
+            max-width: 460px;
+            height: auto;
+            filter: saturate(1.05) contrast(1.03);
+        }
+
+        .hero-img-wrap::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(180deg, transparent 55%, rgba(8, 12, 16, .55));
+        }
+
+        .float-tag {
+            position: absolute;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 12px;
+            padding: 8px 14px;
+            border-radius: 8px;
+            background: rgba(8, 12, 16, .9);
+            border: 1px solid var(--accent);
+            color: var(--accent);
+            box-shadow: var(--glow);
+            animation: floaty 4s ease-in-out infinite;
+            z-index: 3;
+        }
+
+        .float-tag.t1 {
+            top: 8%;
+            left: -6%;
+        }
+
+        .float-tag.t2 {
+            bottom: 14%;
+            right: -8%;
+            border-color: var(--accent2);
+            color: var(--accent2);
+            box-shadow: var(--glow2);
+            animation-delay: 1.5s;
+        }
+
+        @keyframes floaty {
+
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+
+        /* ── MARQUEE SLOGANS ── */
+        .marquee {
+            position: relative;
+            z-index: 2;
+            border-top: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
+            background: var(--bg2);
+            overflow: hidden;
+            padding: 18px 0;
+            white-space: nowrap;
+        }
+
+        .marquee-track {
+            display: inline-flex;
+            gap: 48px;
+            animation: scroll 26s linear infinite;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 20px;
+            letter-spacing: 1px;
+        }
+
+        .marquee-track span {
+            color: var(--muted);
+        }
+
+        .marquee-track span b {
+            color: var(--accent);
+            font-weight: 400;
+        }
+
+        @keyframes scroll {
+            to {
+                transform: translateX(-50%);
+            }
+        }
+
+        /* ── STATS ── */
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 18px;
+        }
+
+        .stat {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 28px 24px;
+            text-align: center;
+        }
+
+        .stat-num {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 44px;
+            line-height: 1;
+            color: var(--accent);
+            text-shadow: var(--glow);
+        }
+
+        .stat-num.g {
+            color: var(--accent2);
+            text-shadow: var(--glow2);
+        }
+
+        .stat-label {
+            margin-top: 10px;
+            font-size: 13px;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            color: var(--muted);
+        }
+
+        /* ── FEATURES ── */
+        .feat-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 18px;
+            margin-top: 48px;
+        }
+
+        .feat {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 30px 26px;
+            transition: .25s;
+        }
+
+        .feat:hover {
+            border-color: var(--accent);
+            box-shadow: var(--glow);
+            transform: translateY(-4px);
+        }
+
+        .feat-ico {
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            display: grid;
+            place-items: center;
+            border: 1px solid var(--border);
+            background: rgba(0, 212, 255, .06);
+            margin-bottom: 18px;
+        }
+
+        .feat-ico svg {
+            width: 24px;
+            height: 24px;
+            stroke: var(--accent);
+        }
+
+        .feat:nth-child(even) .feat-ico svg {
+            stroke: var(--accent2);
+        }
+
+        .feat:nth-child(even) .feat-ico {
+            background: rgba(0, 255, 157, .06);
+        }
+
+        .feat h3 {
+            font-size: 21px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .feat p {
+            color: var(--muted);
+            font-size: 15.5px;
+            text-wrap: pretty;
+        }
+
+        /* ── HOW IT WORKS ── */
+        .flow {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 14px;
+            margin-top: 48px;
+        }
+
+        .step {
+            position: relative;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 26px 22px;
+        }
+
+        .step-num {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 13px;
+            color: var(--accent2);
+            letter-spacing: 2px;
+            margin-bottom: 12px;
+        }
+
+        .step h4 {
+            font-size: 18px;
+            margin-bottom: 6px;
+        }
+
+        .step p {
+            font-size: 14px;
+            color: var(--muted);
+        }
+
+        .step:not(:last-child)::after {
+            content: '→';
+            position: absolute;
+            right: -12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--accent);
+            font-size: 18px;
+            z-index: 3;
+        }
+
+        /* ── SHOWCASE / SPLIT ── */
+        .split {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 56px;
+            align-items: center;
+        }
+
+        .gallery {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+        }
+
+        .gallery img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            transition: .25s;
+        }
+
+        .gallery img:first-child {
+            grid-column: 1 / -1;
+            box-shadow: var(--glow);
+        }
+
+        .gallery img:hover {
+            border-color: var(--accent2);
+            box-shadow: var(--glow2);
+        }
+
+        .check-list {
+            list-style: none;
+            margin-top: 24px;
+            display: grid;
+            gap: 14px;
+        }
+
+        .check-list li {
+            display: flex;
+            gap: 12px;
+            align-items: flex-start;
+            font-size: 16px;
+        }
+
+        .check-list .tick {
+            flex: none;
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            display: grid;
+            place-items: center;
+            background: rgba(0, 255, 157, .1);
+            border: 1px solid var(--accent2);
+            color: var(--accent2);
+            font-size: 12px;
+            margin-top: 2px;
+        }
+
+        .check-list b {
+            color: var(--text);
+            font-weight: 600;
+        }
+
+        /* ── SPECS ── */
+        .spec-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 14px;
+            margin-top: 40px;
+        }
+
+        .spec {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 22px;
+        }
+
+        .spec .k {
+            font-size: 12px;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            color: var(--muted);
+            margin-bottom: 8px;
+        }
+
+        .spec .v {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 22px;
+            color: var(--text);
+        }
+
+        /* ── CTA ── */
+        .cta {
+            text-align: center;
+            background:
+                radial-gradient(circle at 50% 0%, rgba(0, 212, 255, .12), transparent 60%),
+                var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 22px;
+            padding: 72px 32px;
+            box-shadow: var(--glow);
+        }
+
+        .cta h2 {
+            font-size: clamp(30px, 5vw, 54px);
+            font-weight: 700;
+            line-height: 1.05;
+            letter-spacing: -1px;
+            text-wrap: balance;
+            margin-bottom: 18px;
+        }
+
+        .cta p {
+            color: var(--muted);
+            font-size: 19px;
+            max-width: 560px;
+            margin: 0 auto 34px;
+        }
+
+        .cta .btn-row {
+            justify-content: center;
+        }
+
+        /* ── FOOTER ── */
+        footer {
+            position: relative;
+            z-index: 2;
+            border-top: 1px solid var(--border);
+            padding: 40px 28px;
+            text-align: center;
+            color: var(--muted);
+            font-size: 14px;
+        }
+
+        footer .brand {
+            justify-content: center;
+            margin-bottom: 12px;
+        }
+
+        /* ════════ RESPONSIVE ════════ */
+        @media (max-width: 900px) {
+            .hero {
+                grid-template-columns: 1fr;
+                text-align: center;
+                padding-top: 48px;
+            }
+
+            .hero .btn-row {
+                justify-content: center;
+            }
+
+            .hero-sub {
+                margin-inline: auto;
+            }
+
+            .hero-visual {
+                order: -1;
+            }
+
+            .split {
+                grid-template-columns: 1fr;
+                gap: 36px;
+            }
+
+            .feat-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .stats {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .flow {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .step:nth-child(2)::after {
+                display: none;
+            }
+
+            .spec-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        @media (max-width: 600px) {
+            section {
+                padding: 64px 18px;
+            }
+
+            .nav-links {
+                display: none;
+            }
+
+            .feat-grid,
+            .flow,
+            .spec-grid,
+            .stats {
+                grid-template-columns: 1fr;
+            }
+
+            .step::after {
+                display: none !important;
+            }
+
+            .float-tag {
+                display: none;
+            }
+
+            .marquee-track {
+                font-size: 16px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- ── NAV ── -->
+    <nav>
+        <a href="#top" class="brand">
+            <span class="brand-mark">⬡</span> HELIOCORE&nbsp;AI
+        </a>
+        <div class="nav-links">
+            <a href="#features">Можливості</a>
+            <a href="#how">Як працює</a>
+            <a href="#specs">Характеристики</a>
+        </div>
+        <a href="index.html" class="nav-cta">↗ Дашборд</a>
+    </nav>
+
+    <!-- ── HERO ── -->
+    <section class="hero" id="top">
+        <div>
+            <span class="hero-badge"><span class="dot"></span> AUTONOMOUS SOLAR IoT NODE</span>
+            <h1>Енергія сонця.<br><span class="grad">Розум машини.</span></h1>
+            <p class="hero-sub">
+                <b>HelioCore AI</b> — автономний сонячний вузол, що сам полює за сонцем,
+                живиться від нього й транслює дані в реальному часі. Жодних кабелів. Жодних
+                рахунків за світло. Просто постав — і забудь.
+            </p>
+            <div class="btn-row">
+                <a href="index.html" class="btn btn-primary">Відкрити LIVE-дашборд</a>
+                <a href="#how" class="btn btn-ghost">Як це працює →</a>
+            </div>
+        </div>
+
+        <div class="hero-visual">
+            <span class="float-tag t1">☀ SUN-TRACKING · 100%</span>
+            <span class="float-tag t2">⚡ BATTERY · 74%</span>
+            <div class="hero-img-wrap">
+                <img src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/photo_1_2026-06-22_13-03-26-FJoqKp0yxkBYirkdMUFbssyztXAqCD.jpg"
+                    alt="Пристрій HelioCore AI з сонячною панеллю на сервоприводі та LCD-дисплеєм" />
+            </div>
+        </div>
+    </section>
+
+    <!-- ── MARQUEE ── -->
+    <div class="marquee" aria-hidden="true">
+        <div class="marquee-track">
+            <span>⬡ <b>НЕСКІНЧЕННА ЕНЕРГІЯ</b></span>
+            <span>⬡ <b>НУЛЬ КАБЕЛІВ</b></span>
+            <span>⬡ <b>СТЕЖИТЬ ЗА СОНЦЕМ</b></span>
+            <span>⬡ <b>ДАНІ В РЕАЛЬНОМУ ЧАСІ</b></span>
+            <span>⬡ <b>ПРАЦЮЄ БУДЬ-ДЕ</b></span>
+            <span>⬡ <b>НЕСКІНЧЕННА ЕНЕРГІЯ</b></span>
+            <span>⬡ <b>НУЛЬ КАБЕЛІВ</b></span>
+            <span>⬡ <b>СТЕЖИТЬ ЗА СОНЦЕМ</b></span>
+            <span>⬡ <b>ДАНІ В РЕАЛЬНОМУ ЧАСІ</b></span>
+            <span>⬡ <b>ПРАЦЮЄ БУДЬ-ДЕ</b></span>
+        </div>
+    </div>
+
+    <!-- ── STATS ── -->
+    <section class="reveal">
+        <div class="stats">
+            <div class="stat">
+                <div class="stat-num">100%</div>
+                <div class="stat-label">Автономність</div>
+            </div>
+            <div class="stat">
+                <div class="stat-num g">24/7</div>
+                <div class="stat-label">Моніторинг</div>
+            </div>
+            <div class="stat">
+                <div class="stat-num">0₴</div>
+                <div class="stat-label">За електрику</div>
+            </div>
+            <div class="stat">
+                <div class="stat-num g">6</div>
+                <div class="stat-label">Сенсорів на борту</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ── FEATURES ── -->
+    <section id="features" class="reveal">
+        <div class="kicker">// Чому HelioCore</div>
+        <h2 class="h2">Не просто «розумний». <span class="accent">Самодостатній.</span></h2>
+        <p class="lead">Кожна деталь створена так, щоб пристрій працював роками без вашої уваги — на чистій енергії
+            сонця.</p>
+
+        <div class="feat-grid">
+            <div class="feat">
+                <div class="feat-ico">
+                    <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round">
+                        <circle cx="12" cy="12" r="4" />
+                        <path
+                            d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.5 1.5M17.5 17.5L19 19M19 5l-1.5 1.5M6.5 17.5L5 19" />
+                    </svg>
+                </div>
+                <h3>Полювання за сонцем</h3>
+                <p>Сервопривід повертає панель за сонцем протягом дня — до +40% енергії порівняно зі статичним
+                    кріпленням.</p>
+            </div>
+            <div class="feat">
+                <div class="feat-ico">
+                    <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M13 2L3 14h7l-1 8 10-12h-7l1-8z" />
+                    </svg>
+                </div>
+                <h3>Живиться сам</h3>
+                <p>Вбудований акумулятор заряджається вдень і живить електроніку вночі. Один раз поставив — і назавжди.
+                </p>
+            </div>
+            <div class="feat">
+                <div class="feat-ico">
+                    <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M3 12h4l3 8 4-16 3 8h4" />
+                    </svg>
+                </div>
+                <h3>Дані наживо</h3>
+                <p>Температура, вологість, освітленість, напруга та заряд — миттєво на дашборд HG Gateway по
+                    бездротовому каналу.</p>
+            </div>
+            <div class="feat">
+                <div class="feat-ico">
+                    <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <rect x="4" y="5" width="16" height="10" rx="2" />
+                        <path d="M8 19h8M12 15v4" />
+                    </svg>
+                </div>
+                <h3>Дисплей на борту</h3>
+                <p>LCD-екран показує ключові показники прямо на пристрої — без телефона й застосунків.</p>
+            </div>
+            <div class="feat">
+                <div class="feat-ico">
+                    <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                    </svg>
+                </div>
+                <h3>Захищений канал</h3>
+                <p>Кожен пакет телеметрії підписаний API-ключем. Чужі дані в систему не потраплять.</p>
+            </div>
+            <div class="feat">
+                <div class="feat-ico">
+                    <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <rect x="3" y="3" width="18" height="18" rx="2" />
+                        <path d="M3 9h18M9 21V9" />
+                    </svg>
+                </div>
+                <h3>Масштабується</h3>
+                <p>Один вузол чи сотня — додавайте моделі та пристрої, а дашборд об'єднає їх в єдину мережу.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- ── HOW IT WORKS ── -->
+    <section id="how" class="reveal">
+        <div class="kicker">// Принцип роботи</div>
+        <h2 class="h2">Від сонячного променя — <span class="accent2">до графіка на екрані</span></h2>
+        <p class="lead">Чотири кроки, які відбуваються автоматично, поки ви займаєтесь важливими справами.</p>
+
+        <div class="flow">
+            <div class="step">
+                <div class="step-num">01 · ЗБІР</div>
+                <h4>Сонце → панель</h4>
+                <p>Трекер ловить максимум світла й заряджає акумулятор.</p>
+            </div>
+            <div class="step">
+                <div class="step-num">02 · ВИМІР</div>
+                <h4>Сенсори читають</h4>
+                <p>Контролер знімає показники середовища та заряду.</p>
+            </div>
+            <div class="step">
+                <div class="step-num">03 · ПЕРЕДАЧА</div>
+                <h4>Дані → шлюз</h4>
+                <p>Пакет летить на HG Gateway захищеним каналом.</p>
+            </div>
+            <div class="step">
+                <div class="step-num">04 · АНАЛІЗ</div>
+                <h4>Дашборд оживає</h4>
+                <p>Графіки, історія й статус — у реальному часі.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- ── SHOWCASE ── -->
+    <section class="reveal">
+        <div class="split">
+            <div class="gallery">
+                <img src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/photo_2_2026-06-22_13-03-26-E9INDPO7NjgEnNkJyI1mJrahjfBWSX.jpg"
+                    alt="Фронтальний вигляд HelioCore AI: сонячна панель, LCD-дисплей і кнопка живлення" />
+                <img src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/photo_3_2026-06-22_13-03-26-ADDWCSFvBPUNTfYKcyGVzpwOa4MX9K.jpg"
+                    alt="HelioCore AI під кутом поряд із 3D-принтером" />
+                <img src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/photo_1_2026-06-22_13-03-26-FJoqKp0yxkBYirkdMUFbssyztXAqCD.jpg"
+                    alt="HelioCore AI на робочому столі лабораторії" />
+            </div>
+            <div>
+                <div class="kicker">// Інженерія</div>
+                <h2 class="h2">Зібрано руками. <span class="accent">Працює як годинник.</span></h2>
+                <p class="lead">Корпус надруковано на 3D-принтері, начинка — перевірена електроніка. Компактний, міцний
+                    і
+                    готовий до роботи в полі.</p>
+                <ul class="check-list">
+                    <li><span class="tick">✓</span><span><b>Рухома сонячна панель</b> на сервоприводі для максимального
+                            виробітку</span></li>
+                    <li><span class="tick">✓</span><span><b>LCD-дисплей</b> із живими показниками просто на
+                            корпусі</span></li>
+                    <li><span class="tick">✓</span><span><b>Кнопка живлення й порти</b> — зручне керування та
+                            зарядка</span></li>
+                    <li><span class="tick">✓</span><span><b>Міцний 3D-корпус</b>, що захищає електроніку від
+                            середовища</span></li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <!-- ── SPECS ── -->
+    <section id="specs" class="reveal">
+        <div class="kicker">// Технічні дані</div>
+        <h2 class="h2">Що під капотом</h2>
+        <div class="spec-grid">
+            <div class="spec">
+                <div class="k">Живлення</div>
+                <div class="v">Сонячна панель + акумулятор</div>
+            </div>
+            <div class="spec">
+                <div class="k">Орієнтація</div>
+                <div class="v">Серво · трекінг сонця</div>
+            </div>
+            <div class="spec">
+                <div class="k">Дисплей</div>
+                <div class="v">LCD 16×2</div>
+            </div>
+            <div class="spec">
+                <div class="k">Телеметрія</div>
+                <div class="v">Темп · Волога · Світло</div>
+            </div>
+            <div class="spec">
+                <div class="k">Енергія</div>
+                <div class="v">Напруга · Ємність · Заряд</div>
+            </div>
+            <div class="spec">
+                <div class="k">Зв'язок</div>
+                <div class="v">REST · x-api-key</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ── CTA ── -->
+    <section class="reveal">
+        <div class="cta">
+            <div class="kicker" style="justify-content:center">// Приєднуйся до енергії майбутнього</div>
+            <h2>Постав один раз.<br><span class="accent">Стеж за всім — звідусіль.</span></h2>
+            <p>HelioCore AI вже працює й шле дані. Відкрий дашборд і побач свою мережу наживо.</p>
+            <div class="btn-row">
+                <a href="index.html" class="btn btn-primary">Відкрити дашборд →</a>
+                <a href="#top" class="btn btn-ghost">Нагору</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- ── FOOTER ── -->
+    <footer>
+        <div class="brand"><span class="brand-mark">⬡</span> HELIOCORE&nbsp;AI</div>
+        <p>Енергія сонця. Розум машини. · HG Gateway · 2026</p>
+    </footer>
+
+    <script>
+        // Scroll reveal
+        const io = new IntersectionObserver((entries) => {
+            entries.forEach((e) => {
+                if (e.isIntersecting) {
+                    e.target.classList.add('in');
+                    io.unobserve(e.target);
+                }
+            });
+        }, {
+            threshold: 0.15
+        });
+        document.querySelectorAll('.reveal').forEach((el) => io.observe(el));
+
+        // Animated count-up for stat numbers that are pure numeric
+        const animateNum = (el) => {
+            const txt = el.textContent.trim();
+            const match = txt.match(/^(\d+)(.*)$/);
+            if (!match) return;
+            const target = parseInt(match[1], 10);
+            const suffix = match[2] || '';
+            let cur = 0;
+            const step = Math.max(1, Math.round(target / 28));
+            const tick = () => {
+                cur = Math.min(target, cur + step);
+                el.textContent = cur + suffix;
+                if (cur < target) requestAnimationFrame(tick);
+            };
+            tick();
+        };
+        const statIO = new IntersectionObserver((entries) => {
+            entries.forEach((e) => {
+                if (e.isIntersecting) {
+                    animateNum(e.target);
+                    statIO.unobserve(e.target);
+                }
+            });
+        }, {
+            threshold: 0.6
+        });
+        document.querySelectorAll('.stat-num').forEach((el) => statIO.observe(el));
+    </script>
+</body>
+
+</html>
